@@ -62,8 +62,18 @@ async function startExam(subject) {
     currentQuestionIndex = 0;
     timeLeft = 1800; // 30 menit
 
-    // Generate soal acak dari bank soal (Firebase/localStorage/default)
+    // Show loading
+    document.getElementById('loading-overlay').classList.add('show');
+
+    // Generate soal acak dari Firebase
     currentQuestions = await generateExamQuestions(subject);
+
+    // Hide loading
+    document.getElementById('loading-overlay').classList.remove('show');
+
+    if (currentQuestions.length === 0) {
+        return; // alert already shown in generateExamQuestions
+    }
 
     // Reset jawaban
     userAnswers = new Array(currentQuestions.length).fill(null);
