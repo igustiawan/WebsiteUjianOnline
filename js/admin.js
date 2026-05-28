@@ -106,16 +106,42 @@ async function renderDashboard() {
     statsGrid.innerHTML = '<div class="empty-state">Memuat data...</div>';
 
     const subjects = ['pai', 'ppkn', 'matematika', 'bahasa_indonesia', 'bahasa_arab', 'bahasa_inggris'];
-    let history;
+    var allHistory;
 
     if (typeof isFirebaseConfigured === 'function' && isFirebaseConfigured()) {
         try {
-            history = await getExamHistoryFromFirestore();
+            allHistory = await getExamHistoryFromFirestore();
         } catch (e) {
-            history = getHistory();
+            allHistory = getHistory();
         }
     } else {
-        history = getHistory();
+        allHistory = getHistory();
+    }
+
+    // Populate user filter
+    var dashUserFilter = document.getElementById('dashboard-user-filter');
+    var currentVal = dashUserFilter.value;
+    if (dashUserFilter.options.length <= 1) {
+        var users = {};
+        allHistory.forEach(function(h) {
+            if (h.studentName && !users[h.studentName]) {
+                users[h.studentName] = h.studentEmail || '';
+            }
+        });
+        Object.keys(users).forEach(function(name) {
+            var opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name + (users[name] ? ' (' + users[name] + ')' : '');
+            dashUserFilter.appendChild(opt);
+        });
+        if (currentVal) dashUserFilter.value = currentVal;
+    }
+
+    // Apply user filter
+    var userFilter = dashUserFilter.value;
+    var history = allHistory;
+    if (userFilter && userFilter !== 'all') {
+        history = allHistory.filter(function(h) { return h.studentName === userFilter; });
     }
 
     statsGrid.innerHTML = '';

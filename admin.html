@@ -54,6 +54,11 @@
             <!-- Dashboard Section -->
             <div id="dashboard-section">
                 <h2 class="section-title">📈 Pemantauan Per Mata Pelajaran</h2>
+                <div class="filter-bar">
+                    <select id="dashboard-user-filter" onchange="renderDashboard()">
+                        <option value="all">Semua Siswa</option>
+                    </select>
+                </div>
                 <div class="stats-grid" id="stats-grid"></div>
 
                 <h2 class="section-title">📊 Ringkasan Keseluruhan</h2>
