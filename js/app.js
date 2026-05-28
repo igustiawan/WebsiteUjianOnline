@@ -9,11 +9,8 @@ let timeLeft = 1800; // 30 menit dalam detik
 // ==================== DATA MANAGEMENT ====================
 
 function getQuestionBank(subject) {
-    // Check localStorage first for admin-edited questions
     const custom = localStorage.getItem(`questions_${subject}`);
     if (custom) return JSON.parse(custom);
-
-    // Fall back to default bank
     switch(subject) {
         case 'pai': return soalPAI;
         case 'ppkn': return soalPPKN;
@@ -34,9 +31,14 @@ function shuffleArray(array) {
     return shuffled;
 }
 
-function generateExamQuestions(subject) {
-    const bank = getQuestionBank(subject);
-    // Acak soal dan ambil maksimal 15
+async function generateExamQuestions(subject) {
+    let bank;
+    // Try Firebase first
+    if (typeof getQuestionBankAsync === 'function' && typeof isFirebaseConfigured === 'function' && isFirebaseConfigured()) {
+        bank = await getQuestionBankAsync(subject);
+    } else {
+        bank = getQuestionBank(subject);
+    }
     const shuffled = shuffleArray(bank);
     return shuffled.slice(0, 15);
 }
@@ -70,13 +72,13 @@ function getSubjectName(subject) {
 
 // ==================== FUNGSI UTAMA ====================
 
-function startExam(subject) {
+async function startExam(subject) {
     currentSubject = subject;
     currentQuestionIndex = 0;
     timeLeft = 1800; // 30 menit
 
-    // Generate soal acak dari bank soal
-    currentQuestions = generateExamQuestions(subject);
+    // Generate soal acak dari bank soal (Firebase/localStorage/default)
+    currentQuestions = await generateExamQuestions(subject);
 
     // Reset jawaban
     userAnswers = new Array(currentQuestions.length).fill(null);

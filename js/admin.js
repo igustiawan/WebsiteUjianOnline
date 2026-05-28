@@ -227,6 +227,10 @@ function getQuestionBank(subject) {
 
 function saveQuestionBank(subject, questions) {
     localStorage.setItem(`questions_${subject}`, JSON.stringify(questions));
+    // Also save to Firestore
+    if (typeof saveQuestionsToFirestore === 'function' && typeof isFirebaseConfigured === 'function' && isFirebaseConfigured()) {
+        saveQuestionsToFirestore(subject, questions);
+    }
 }
 
 function renderSubjectTabs() {
@@ -456,6 +460,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (savedKey) {
         const keyInput = document.getElementById('ai-api-key');
         if (keyInput) keyInput.value = savedKey;
+    }
+    // Auto-seed questions to Firestore on first load
+    if (typeof seedQuestionsToFirestore === 'function' && typeof isFirebaseConfigured === 'function' && isFirebaseConfigured()) {
+        seedQuestionsToFirestore().then(() => {
+            console.log('✅ Question bank check/seed complete');
+        });
     }
 });
 

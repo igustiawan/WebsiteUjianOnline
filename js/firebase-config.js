@@ -142,3 +142,90 @@ function getFromLocalStorage() {
 function isFirebaseConfigured() {
     return firebaseConfig.apiKey !== "YOUR_API_KEY" && firebaseConfig.projectId !== "YOUR_PROJECT_ID";
 }
+
+// ==================== QUESTION BANK IN FIRESTORE ====================
+
+// Upload semua soal default ke Firestore (1x saja saat pertama kali)
+async function seedQuestionsToFirestore() {
+    if (!isFirebaseConfigured()) return false;
+
+    const subjects = {
+        'pai': typeof soalPAI !== 'undefined' ? soalPAI : [],
+        'ppkn': typeof soalPPKN !== 'undefined' ? soalPPKN : [],
+        'matematika': typeof soalMatematika !== 'undefined' ? soalMatematika : [],
+        'bahasa_indonesia': typeof soalBahasaIndonesia !== 'undefined' ? soalBahasaIndonesia : [],
+        'bahasa_arab': typeof soalBahasaArab !== 'undefined' ? soalBahasaArab : [],
+        'bahasa_inggris': typeof soalBahasaInggris !== 'undefined' ? soalBahasaInggris : []
+    };
+
+    try {
+        for (const [subject, questions] of Object.entries(subjects)) {
+            if (questions.length === 0) continue;
+            const existing = await db.collection('questionBank').doc(subject).get();
+            if (existing.exists && existing.data().questions && existing.data().questions.length > 0) {
+                continue;
+            }
+            await db.collection('questionBank').doc(subject).set({
+                subject: subject,
+                questions: questions,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            console.log(`✅ Seeded ${questions.length} soal ${subject} ke Firestore`);
+        }
+        return true;
+    } catch (error) {
+        console.error('❌ Gagal seed soal ke Firestore:', error);
+        return false;
+    }
+}
+
+// Ambil bank soal dari Firestore
+async function getQuestionsFromFirestore(subject) {
+    if (!isFirebaseConfigured()) return null;
+    try {
+        const doc = await db.collection('questionBank').doc(subject).get();
+        if (doc.exists && doc.data().questions) {
+            return doc.data().questions;
+        }
+        return null;
+    } catch (error) {
+        console.error('❌ Gagal ambil soal dari Firestore:', error);
+        return null;
+    }
+}
+
+// Simpan bank soal ke Firestore
+async function saveQuestionsToFirestore(subject, questions) {
+    if (!isFirebaseConfigured()) return false;
+    try {
+        await db.collection('questionBank').doc(subject).set({
+            subject: subject,
+            questions: questions,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        console.log(`✅ Soal ${subject} disimpan ke Firestore (${questions.length} soal)`);
+        return true;
+    } catch (error) {
+        console.error('❌ Gagal simpan soal ke Firestore:', error);
+        return false;
+    }
+}
+
+// Get question bank - tries Firestore first, then localStorage, then default JS
+async function getQuestionBankAsync(subject) {
+    if (isFirebaseConfigured()) {
+        const firestoreQ = await getQuestionsFromFirestore(subject);
+        if (firestoreQ && firestoreQ.length > 0) return firestoreQ;
+    }
+    const custom = localStorage.getItem(`questions_${subject}`);
+    if (custom) return JSON.parse(custom);
+    switch(subject) {
+        case 'pai': return typeof soalPAI !== 'undefined' ? [...soalPAI] : [];
+        case 'ppkn': return typeof soalPPKN !== 'undefined' ? [...soalPPKN] : [];
+        case 'matematika': return typeof soalMatematika !== 'undefined' ? [...soalMatematika] : [];
+        case 'bahasa_indonesia': return typeof soalBahasaIndonesia !== 'undefined' ? [...soalBahasaIndonesia] : [];
+        case 'bahasa_arab': return typeof soalBahasaArab !== 'undefined' ? [...soalBahasaArab] : [];
+        case 'bahasa_inggris': return typeof soalBahasaInggris !== 'undefined' ? [...soalBahasaInggris] : [];
+        default: return [];
+    }
+}
