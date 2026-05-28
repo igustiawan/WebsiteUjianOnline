@@ -6,6 +6,63 @@ let userAnswers = [];
 let timerInterval = null;
 let timeLeft = 1800; // 30 menit dalam detik
 
+// ==================== DATA MANAGEMENT ====================
+
+function getQuestionBank(subject) {
+    // Check localStorage first for admin-edited questions
+    const custom = localStorage.getItem(`questions_${subject}`);
+    if (custom) return JSON.parse(custom);
+
+    // Fall back to default bank
+    switch(subject) {
+        case 'pai': return soalPAI;
+        case 'ppkn': return soalPPKN;
+        case 'matematika': return soalMatematika;
+        case 'bahasa_indonesia': return soalBahasaIndonesia;
+        case 'bahasa_arab': return soalBahasaArab;
+        case 'bahasa_inggris': return soalBahasaInggris;
+        default: return [];
+    }
+}
+
+function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
+function generateExamQuestions(subject) {
+    const bank = getQuestionBank(subject);
+    // Acak soal dan ambil maksimal 10
+    const shuffled = shuffleArray(bank);
+    return shuffled.slice(0, 10);
+}
+
+function saveHistory(record) {
+    const history = JSON.parse(localStorage.getItem('examHistory') || '[]');
+    history.unshift(record); // tambah di depan (terbaru)
+    localStorage.setItem('examHistory', JSON.stringify(history));
+}
+
+function getHistory() {
+    return JSON.parse(localStorage.getItem('examHistory') || '[]');
+}
+
+function getSubjectName(subject) {
+    const names = {
+        'pai': 'PAI',
+        'ppkn': 'Pendidikan Pancasila',
+        'matematika': 'Matematika',
+        'bahasa_indonesia': 'Bahasa Indonesia',
+        'bahasa_arab': 'Bahasa Arab',
+        'bahasa_inggris': 'Bahasa Inggris'
+    };
+    return names[subject] || subject;
+}
+
 // ==================== FUNGSI UTAMA ====================
 
 function startExam(subject) {
@@ -13,27 +70,8 @@ function startExam(subject) {
     currentQuestionIndex = 0;
     timeLeft = 1800; // 30 menit
 
-    // Load soal berdasarkan mata pelajaran
-    switch(subject) {
-        case 'pai':
-            currentQuestions = soalPAI;
-            break;
-        case 'ppkn':
-            currentQuestions = soalPPKN;
-            break;
-        case 'matematika':
-            currentQuestions = soalMatematika;
-            break;
-        case 'bahasa_indonesia':
-            currentQuestions = soalBahasaIndonesia;
-            break;
-        case 'bahasa_arab':
-            currentQuestions = soalBahasaArab;
-            break;
-        case 'bahasa_inggris':
-            currentQuestions = soalBahasaInggris;
-            break;
-    }
+    // Generate soal acak dari bank soal
+    currentQuestions = generateExamQuestions(subject);
 
     // Reset jawaban
     userAnswers = new Array(currentQuestions.length).fill(null);
@@ -100,7 +138,7 @@ function showQuestion() {
 
 function selectOption(index) {
     userAnswers[currentQuestionIndex] = index;
-    showQuestion(); // Re-render untuk update tampilan selected
+    showQuestion();
 }
 
 function nextQuestion() {
@@ -118,7 +156,6 @@ function prevQuestion() {
 }
 
 function submitExam() {
-    // Cek apakah semua soal sudah dijawab
     const unanswered = userAnswers.filter(a => a === null).length;
     if (unanswered > 0) {
         if (!confirm(`Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengumpulkan?`)) {
@@ -134,10 +171,8 @@ function submitExam() {
 }
 
 function finishExam() {
-    // Hentikan timer
     clearInterval(timerInterval);
 
-    // Hitung skor
     let correct = 0;
     const details = [];
 
@@ -154,10 +189,27 @@ function finishExam() {
         });
     });
 
-    const score = Math.round((correct / currentQuestions.length) * 100);
+    const total = currentQuestions.length;
+    const score = Math.round((correct / total) * 100);
+    const wrong = total - correct;
+
+    // Simpan ke history
+    const record = {
+        id: Date.now(),
+        subject: currentSubject,
+        subjectName: getSubjectName(currentSubject),
+        date: new Date().toLocaleString('id-ID'),
+        score: score,
+        correct: correct,
+        wrong: wrong,
+        total: total,
+        timeUsed: 1800 - timeLeft,
+        details: details
+    };
+    saveHistory(record);
 
     // Tampilkan hasil
-    showResult(score, correct, currentQuestions.length, details);
+    showResult(score, correct, total, details);
 }
 
 function showResult(score, correct, total, details) {
@@ -165,7 +217,6 @@ function showResult(score, correct, total, details) {
     document.getElementById('exam-page').style.display = 'none';
     document.getElementById('result-page').style.display = 'block';
 
-    // Icon dan pesan berdasarkan skor
     let icon, title, message;
     if (score >= 80) {
         icon = '🌟';
@@ -190,7 +241,6 @@ function showResult(score, correct, total, details) {
     document.getElementById('score-display').textContent = `${score}/100`;
     document.getElementById('result-message').textContent = `${message}\nBenar: ${correct} dari ${total} soal`;
 
-    // Detail jawaban
     const detailsContainer = document.getElementById('result-details');
     detailsContainer.innerHTML = '<h3>📋 Detail Jawaban:</h3>';
     
@@ -238,10 +288,8 @@ function updateTimerDisplay() {
     document.getElementById('timer-display').textContent = 
         `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     
-    // Warna merah kalau waktu hampir habis
     const timerEl = document.getElementById('timer');
     if (timeLeft <= 60) {
         timerEl.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
-        timerEl.style.animation = 'pulse 1s infinite';
     }
 }

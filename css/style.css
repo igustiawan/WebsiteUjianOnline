@@ -329,6 +329,23 @@ header .subtitle {
     color: #e74c3c;
 }
 
+/* Admin link on home page */
+.admin-link {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.admin-link a {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: color 0.3s;
+}
+
+.admin-link a:hover {
+    color: white;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     header h1 {
