@@ -71,7 +71,7 @@ function showHomePage() {
 }
 
 function hideAllPages() {
-    var pages = ['login-page','class-page','home-page','exam-page','result-page','student-history-page','materi-page'];
+    var pages = ['login-page','class-page','home-page','exam-page','result-page','student-history-page','materi-page','leaderboard-page'];
     pages.forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -439,6 +439,85 @@ function cancelExam() {
 }
 
 function goHome() { hideAllPages(); document.getElementById('home-page').style.display = 'block'; clearInterval(timerInterval); }
+
+// ==================== LEADERBOARD ====================
+
+function showLeaderboard() {
+    hideAllPages();
+    document.getElementById('leaderboard-page').style.display = 'block';
+    renderLeaderboard();
+}
+
+async function renderLeaderboard() {
+    var container = document.getElementById('leaderboard-list');
+    var filter = document.getElementById('leaderboard-filter').value;
+    container.innerHTML = '<div class="empty-state-student">Memuat ranking...</div>';
+
+    var history = [];
+    try {
+        if (isFirebaseConfigured()) {
+            var snapshot = await db.collection('examHistory').get();
+            snapshot.forEach(function(doc) { history.push(doc.data()); });
+        }
+    } catch (e) {
+        history = JSON.parse(localStorage.getItem('examHistory') || '[]');
+    }
+
+    if (history.length === 0) {
+        history = JSON.parse(localStorage.getItem('examHistory') || '[]');
+    }
+
+    // Filter by subject
+    if (filter && filter !== 'all') {
+        history = history.filter(function(h) { return h.subject === filter; });
+    }
+
+    // Group by student, calculate average score
+    var students = {};
+    history.forEach(function(h) {
+        var key = h.studentUid || h.studentName || 'Anonim';
+        if (!students[key]) {
+            students[key] = { name: h.studentName || 'Anonim', totalScore: 0, count: 0, bestScore: 0 };
+        }
+        students[key].totalScore += (h.score || 0);
+        students[key].count++;
+        if ((h.score || 0) > students[key].bestScore) {
+            students[key].bestScore = h.score;
+        }
+    });
+
+    // Convert to array and sort by best score then avg
+    var ranking = Object.values(students);
+    ranking.sort(function(a, b) {
+        if (b.bestScore !== a.bestScore) return b.bestScore - a.bestScore;
+        return (b.totalScore / b.count) - (a.totalScore / a.count);
+    });
+
+    if (ranking.length === 0) {
+        container.innerHTML = '<div class="empty-state-student">Belum ada data ranking.</div>';
+        return;
+    }
+
+    container.innerHTML = '';
+    ranking.forEach(function(student, idx) {
+        var rank = idx + 1;
+        var avg = Math.round(student.totalScore / student.count);
+        var medal = '';
+        if (rank === 1) medal = '🥇';
+        else if (rank === 2) medal = '🥈';
+        else if (rank === 3) medal = '🥉';
+        else medal = '#' + rank;
+
+        var isMe = student.name === studentName;
+        var div = document.createElement('div');
+        div.className = 'leaderboard-item' + (isMe ? ' is-me' : '');
+        div.innerHTML = '<div class="lb-rank">' + medal + '</div>' +
+            '<div class="lb-info"><span class="lb-name">' + student.name + (isMe ? ' (Kamu)' : '') + '</span>' +
+            '<span class="lb-stats">' + student.count + ' ujian • Rata-rata: ' + avg + '</span></div>' +
+            '<div class="lb-score">' + student.bestScore + '<small>/100</small></div>';
+        container.appendChild(div);
+    });
+}
 
 // ==================== TIMER ====================
 function startTimer() {

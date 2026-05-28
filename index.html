@@ -104,6 +104,7 @@
                 </div>
                 <div class="home-actions">
                     <button class="btn-history-student" onclick="showStudentHistory()">📜 Riwayat</button>
+                    <button class="btn-history-student" style="background:linear-gradient(135deg,#f59e0b,#eab308);" onclick="showLeaderboard()">🏆 Ranking</button>
                     <button class="btn-logout" onclick="signOut()">Keluar</button>
                 </div>
             </div>
@@ -158,6 +159,27 @@
             <div class="admin-link" style="display:none;">
                 <a href="admin.html">Masuk sebagai Admin →</a>
             </div>
+        </div>
+
+        <!-- Halaman Leaderboard -->
+        <div id="leaderboard-page" style="display: none;">
+            <header>
+                <h1>🏆 Leaderboard</h1>
+                <p class="subtitle">Ranking Siswa Terbaik</p>
+            </header>
+            <div class="filter-bar-student">
+                <select id="leaderboard-filter" onchange="renderLeaderboard()">
+                    <option value="all">Semua Mata Pelajaran</option>
+                    <option value="pai">PAI</option>
+                    <option value="ppkn">Pendidikan Pancasila</option>
+                    <option value="matematika">Matematika</option>
+                    <option value="bahasa_indonesia">Bahasa Indonesia</option>
+                    <option value="bahasa_arab">Bahasa Arab</option>
+                    <option value="bahasa_inggris">Bahasa Inggris</option>
+                </select>
+            </div>
+            <div id="leaderboard-list" class="leaderboard-list"></div>
+            <button class="btn btn-secondary" onclick="goHome()" style="margin-top:16px;">← Kembali ke Menu</button>
         </div>
 
         <!-- Halaman Materi -->
