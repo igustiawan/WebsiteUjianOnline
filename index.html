@@ -9,15 +9,15 @@
 <body>
     <div class="container">
         <header>
-            <h1>📚 Ujian Online</h1>
-            <p class="subtitle">SAT TA 2025/2026 - Kelas I (Satu)</p>
+            <h1>Ujian Online</h1>
+            <p class="subtitle">SAT TA 2025/2026 — Kelas I (Satu)</p>
         </header>
 
         <!-- Halaman Utama -->
         <div id="home-page">
             <div class="welcome-box">
-                <h2>Selamat Datang! 👋</h2>
-                <p>Pilih mata pelajaran untuk memulai ujian:</p>
+                <h2>Halo, siap ujian hari ini?</h2>
+                <p>Pilih mata pelajaran di bawah untuk mulai mengerjakan soal.</p>
             </div>
 
             <div class="subject-grid">
@@ -25,42 +25,42 @@
                     <div class="subject-icon">🕌</div>
                     <h3>PAI</h3>
                     <p>Pendidikan Agama Islam</p>
-                    <span class="badge">10 Soal</span>
+                    <span class="badge">10 Soal • 30 Menit</span>
                 </div>
                 <div class="subject-card" onclick="startExam('ppkn')">
-                    <div class="subject-icon">🇮🇩</div>
+                    <div class="subject-icon">🏛️</div>
                     <h3>Pendidikan Pancasila</h3>
                     <p>Mengenal Indonesia & Lingkungan</p>
-                    <span class="badge">10 Soal</span>
+                    <span class="badge">10 Soal • 30 Menit</span>
                 </div>
                 <div class="subject-card" onclick="startExam('matematika')">
-                    <div class="subject-icon">🔢</div>
+                    <div class="subject-icon">🧮</div>
                     <h3>Matematika</h3>
                     <p>Bilangan, Penjumlahan & Pengurangan</p>
-                    <span class="badge">10 Soal</span>
+                    <span class="badge">10 Soal • 30 Menit</span>
                 </div>
                 <div class="subject-card" onclick="startExam('bahasa_indonesia')">
-                    <div class="subject-icon">📖</div>
+                    <div class="subject-icon">📝</div>
                     <h3>Bahasa Indonesia</h3>
                     <p>Membaca, Menulis & Kalimat</p>
-                    <span class="badge">10 Soal</span>
+                    <span class="badge">10 Soal • 30 Menit</span>
                 </div>
                 <div class="subject-card" onclick="startExam('bahasa_arab')">
                     <div class="subject-icon">🌙</div>
                     <h3>Bahasa Arab</h3>
                     <p>Kosakata & Percakapan</p>
-                    <span class="badge">10 Soal</span>
+                    <span class="badge">10 Soal • 30 Menit</span>
                 </div>
                 <div class="subject-card" onclick="startExam('bahasa_inggris')">
                     <div class="subject-icon">🌍</div>
                     <h3>Bahasa Inggris</h3>
                     <p>Vocabulary & Simple Sentences</p>
-                    <span class="badge">10 Soal</span>
+                    <span class="badge">10 Soal • 30 Menit</span>
                 </div>
             </div>
 
             <div class="admin-link">
-                <a href="admin.html">🔐 Masuk sebagai Admin</a>
+                <a href="admin.html">Masuk sebagai Admin →</a>
             </div>
         </div>
 
@@ -71,7 +71,10 @@
                     <h2 id="exam-title"></h2>
                     <p id="exam-progress"></p>
                 </div>
-                <div class="timer" id="timer">⏱️ <span id="timer-display">30:00</span></div>
+                <div class="exam-top-bar">
+                    <div class="timer" id="timer"><span id="timer-display">30:00</span></div>
+                    <button class="btn btn-cancel" onclick="cancelExam()">✕ Keluar</button>
+                </div>
             </div>
 
             <div class="question-container" id="question-container">
@@ -81,9 +84,9 @@
             </div>
 
             <div class="exam-navigation">
-                <button class="btn btn-secondary" id="btn-prev" onclick="prevQuestion()">⬅️ Sebelumnya</button>
-                <button class="btn btn-primary" id="btn-next" onclick="nextQuestion()">Selanjutnya ➡️</button>
-                <button class="btn btn-success" id="btn-submit" onclick="submitExam()" style="display: none;">✅ Selesai</button>
+                <button class="btn btn-secondary" id="btn-prev" onclick="prevQuestion()">← Sebelumnya</button>
+                <button class="btn btn-primary" id="btn-next" onclick="nextQuestion()">Selanjutnya →</button>
+                <button class="btn btn-success" id="btn-submit" onclick="submitExam()" style="display: none;">Kumpulkan ✓</button>
             </div>
         </div>
 
@@ -95,7 +98,7 @@
                 <div class="score-display" id="score-display"></div>
                 <p class="result-message" id="result-message"></p>
                 <div class="result-details" id="result-details"></div>
-                <button class="btn btn-primary" onclick="goHome()">🏠 Kembali ke Menu</button>
+                <button class="btn btn-primary" onclick="goHome()">← Kembali ke Menu</button>
             </div>
         </div>
     </div>

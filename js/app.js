@@ -259,6 +259,19 @@ function showResult(score, correct, total, details) {
     });
 }
 
+function cancelExam() {
+    if (confirm('Yakin ingin keluar dari ujian?\n\nProgress kamu tidak akan disimpan dan harus mengulang dari awal.')) {
+        clearInterval(timerInterval);
+        currentQuestions = [];
+        currentQuestionIndex = 0;
+        userAnswers = [];
+        timeLeft = 1800;
+        document.getElementById('home-page').style.display = 'block';
+        document.getElementById('exam-page').style.display = 'none';
+        document.getElementById('result-page').style.display = 'none';
+    }
+}
+
 function goHome() {
     document.getElementById('home-page').style.display = 'block';
     document.getElementById('exam-page').style.display = 'none';
@@ -290,6 +303,6 @@ function updateTimerDisplay() {
     
     const timerEl = document.getElementById('timer');
     if (timeLeft <= 60) {
-        timerEl.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+        timerEl.classList.add('warning');
     }
 }
