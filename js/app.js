@@ -4,7 +4,21 @@ let currentQuestions = [];
 let currentQuestionIndex = 0;
 let userAnswers = [];
 let timerInterval = null;
-let timeLeft = 1800; // 30 menit dalam detik
+let timeLeft = 1800;
+let studentName = '';
+
+// ==================== NAME INPUT ====================
+
+function submitName(e) {
+    e.preventDefault();
+    const nameInput = document.getElementById('student-name').value.trim();
+    if (!nameInput) return;
+
+    studentName = nameInput;
+    document.getElementById('display-name').textContent = studentName;
+    document.getElementById('name-page').style.display = 'none';
+    document.getElementById('home-page').style.display = 'block';
+}
 
 // ==================== DATA MANAGEMENT ====================
 
@@ -207,6 +221,7 @@ function finishExam() {
     // Simpan ke history
     const record = {
         id: Date.now(),
+        studentName: studentName,
         subject: currentSubject,
         subjectName: getSubjectName(currentSubject),
         date: new Date().toLocaleString('id-ID'),
@@ -287,6 +302,7 @@ function goHome() {
     document.getElementById('home-page').style.display = 'block';
     document.getElementById('exam-page').style.display = 'none';
     document.getElementById('result-page').style.display = 'none';
+    document.getElementById('name-page').style.display = 'none';
     clearInterval(timerInterval);
 }
 

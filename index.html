@@ -19,10 +19,29 @@
             <p class="subtitle">SAT TA 2025/2026 — Kelas I (Satu)</p>
         </header>
 
-        <!-- Halaman Utama -->
-        <div id="home-page">
+        <!-- Halaman Input Nama -->
+        <div id="name-page">
             <div class="welcome-box">
-                <h2>Halo Nak! 👋 Siap ujian hari ini?</h2>
+                <div class="welcome-illustration">🎒📚✨</div>
+                <h2>Halo Nak! 👋</h2>
+                <p>Tulis namamu dulu ya, baru bisa mulai ujian!</p>
+            </div>
+
+            <div class="name-form-box">
+                <form onsubmit="submitName(event)">
+                    <div class="name-input-wrapper">
+                        <label for="student-name">Nama Lengkap:</label>
+                        <input type="text" id="student-name" placeholder="Tulis namamu di sini..." required autocomplete="off">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Mulai Ujian! 🚀</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Halaman Utama (Pilih Mapel) -->
+        <div id="home-page" style="display: none;">
+            <div class="welcome-box">
+                <h2>Halo, <span id="display-name"></span>! 🌟</h2>
                 <p>Pilih mata pelajaran di bawah untuk mulai mengerjakan soal ya!</p>
             </div>
 
