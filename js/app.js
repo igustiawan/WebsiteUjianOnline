@@ -210,7 +210,13 @@ async function renderStudentHistory() {
             history.sort(function(a, b) { return (b.id || 0) - (a.id || 0); });
         }
     } catch (e) {
-        console.error('renderStudentHistory error:', e);
+        console.error('renderStudentHistory Firestore error:', e);
+    }
+
+    // Fallback to localStorage if Firestore returned nothing
+    if (history.length === 0) {
+        var localHistory = JSON.parse(localStorage.getItem('examHistory') || '[]');
+        history = localHistory.filter(function(h) { return h.studentUid === studentUid; });
     }
 
     if (filter && filter !== 'all') {
