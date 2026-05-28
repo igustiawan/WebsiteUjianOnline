@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ujian Online - SAT TA 2025/2026 Kelas 1</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Ujian Online</h1>
+            <p class="subtitle">SAT TA 2025/2026 - Kelas I (Satu)</p>
+        </header>
+
+        <!-- Halaman Utama -->
+        <div id="home-page">
+            <div class="welcome-box">
+                <h2>Selamat Datang! 👋</h2>
+                <p>Pilih mata pelajaran untuk memulai ujian:</p>
+            </div>
+
+            <div class="subject-grid">
+                <div class="subject-card" onclick="startExam('pai')">
+                    <div class="subject-icon">🕌</div>
+                    <h3>PAI</h3>
+                    <p>Pendidikan Agama Islam</p>
+                    <span class="badge">10 Soal</span>
+                </div>
+                <div class="subject-card" onclick="startExam('ppkn')">
+                    <div class="subject-icon">🇮🇩</div>
+                    <h3>Pendidikan Pancasila</h3>
+                    <p>Mengenal Indonesia & Lingkungan</p>
+                    <span class="badge">10 Soal</span>
+                </div>
+                <div class="subject-card" onclick="startExam('matematika')">
+                    <div class="subject-icon">🔢</div>
+                    <h3>Matematika</h3>
+                    <p>Bilangan, Penjumlahan & Pengurangan</p>
+                    <span class="badge">10 Soal</span>
+                </div>
+                <div class="subject-card" onclick="startExam('bahasa_indonesia')">
+                    <div class="subject-icon">📖</div>
+                    <h3>Bahasa Indonesia</h3>
+                    <p>Membaca, Menulis & Kalimat</p>
+                    <span class="badge">10 Soal</span>
+                </div>
+                <div class="subject-card" onclick="startExam('bahasa_arab')">
+                    <div class="subject-icon">🌙</div>
+                    <h3>Bahasa Arab</h3>
+                    <p>Kosakata & Percakapan</p>
+                    <span class="badge">10 Soal</span>
+                </div>
+                <div class="subject-card" onclick="startExam('bahasa_inggris')">
+                    <div class="subject-icon">🌍</div>
+                    <h3>Bahasa Inggris</h3>
+                    <p>Vocabulary & Simple Sentences</p>
+                    <span class="badge">10 Soal</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman Ujian -->
+        <div id="exam-page" style="display: none;">
+            <div class="exam-header">
+                <div class="exam-info">
+                    <h2 id="exam-title"></h2>
+                    <p id="exam-progress"></p>
+                </div>
+                <div class="timer" id="timer">⏱️ <span id="timer-display">30:00</span></div>
+            </div>
+
+            <div class="question-container" id="question-container">
+                <div class="question-number" id="question-number"></div>
+                <div class="question-text" id="question-text"></div>
+                <div class="options" id="options-container"></div>
+            </div>
+
+            <div class="exam-navigation">
+                <button class="btn btn-secondary" id="btn-prev" onclick="prevQuestion()">⬅️ Sebelumnya</button>
+                <button class="btn btn-primary" id="btn-next" onclick="nextQuestion()">Selanjutnya ➡️</button>
+                <button class="btn btn-success" id="btn-submit" onclick="submitExam()" style="display: none;">✅ Selesai</button>
+            </div>
+        </div>
+
+        <!-- Halaman Hasil -->
+        <div id="result-page" style="display: none;">
+            <div class="result-container">
+                <div class="result-icon" id="result-icon"></div>
+                <h2 id="result-title"></h2>
+                <div class="score-display" id="score-display"></div>
+                <p id="result-message"></p>
+                <div class="result-details" id="result-details"></div>
+                <button class="btn btn-primary" onclick="goHome()">🏠 Kembali ke Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/soal-pai.js"></script>
+    <script src="js/soal-ppkn.js"></script>
+    <script src="js/soal-matematika.js"></script>
+    <script src="js/soal-bahasa-indonesia.js"></script>
+    <script src="js/soal-bahasa-arab.js"></script>
+    <script src="js/soal-bahasa-inggris.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

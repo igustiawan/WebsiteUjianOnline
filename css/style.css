@@ -1,0 +1,360 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+header {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    font-size: 2.5em;
+    margin-bottom: 5px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+header .subtitle {
+    font-size: 1.2em;
+    opacity: 0.9;
+}
+
+/* Welcome Box */
+.welcome-box {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.welcome-box h2 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 1.8em;
+}
+
+.welcome-box p {
+    color: #666;
+    font-size: 1.1em;
+}
+
+/* Subject Grid */
+.subject-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.subject-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.subject-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+
+.subject-card:active {
+    transform: translateY(-2px);
+}
+
+.subject-icon {
+    font-size: 3em;
+    margin-bottom: 10px;
+}
+
+.subject-card h3 {
+    color: #333;
+    margin-bottom: 5px;
+    font-size: 1.2em;
+}
+
+.subject-card p {
+    color: #888;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+.badge {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: bold;
+}
+
+/* Exam Page */
+.exam-header {
+    background: white;
+    border-radius: 15px;
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.exam-info h2 {
+    color: #333;
+    font-size: 1.3em;
+}
+
+.exam-info p {
+    color: #888;
+    font-size: 0.9em;
+}
+
+.timer {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+/* Question Container */
+.question-container {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    min-height: 300px;
+}
+
+.question-number {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.question-text {
+    font-size: 1.2em;
+    color: #333;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.option {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 15px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.05em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.option:hover {
+    background: #e8f4fd;
+    border-color: #667eea;
+}
+
+.option.selected {
+    background: #e8f4fd;
+    border-color: #667eea;
+    color: #333;
+    font-weight: 500;
+}
+
+.option-letter {
+    background: #667eea;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9em;
+    flex-shrink: 0;
+}
+
+.option.selected .option-letter {
+    background: #764ba2;
+}
+
+/* Navigation */
+.exam-navigation {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.btn-secondary:hover {
+    background: #dee2e6;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #00b894, #00cec9);
+    color: white;
+}
+
+.btn-success:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 184, 148, 0.4);
+}
+
+/* Result Page */
+.result-container {
+    background: white;
+    border-radius: 15px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.result-icon {
+    font-size: 5em;
+    margin-bottom: 15px;
+}
+
+.result-container h2 {
+    color: #333;
+    font-size: 1.8em;
+    margin-bottom: 15px;
+}
+
+.score-display {
+    font-size: 3em;
+    font-weight: bold;
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+.result-message {
+    color: #666;
+    font-size: 1.1em;
+    margin-bottom: 25px;
+}
+
+.result-details {
+    text-align: left;
+    margin: 25px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+}
+
+.result-details h3 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.result-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 0.95em;
+}
+
+.result-item:last-child {
+    border-bottom: none;
+}
+
+.result-item.correct {
+    color: #00b894;
+}
+
+.result-item.wrong {
+    color: #e74c3c;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    header h1 {
+        font-size: 1.8em;
+    }
+
+    .subject-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .exam-header {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .exam-navigation {
+        flex-direction: column;
+    }
+
+    .question-text {
+        font-size: 1.05em;
+    }
+
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
+}
