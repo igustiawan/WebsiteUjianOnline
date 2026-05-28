@@ -20,7 +20,7 @@ function signInWithGoogle() {
         studentEmail = user.email || '';
         studentUid = user.uid || '';
         studentPhoto = user.photoURL || '';
-        showHomePage();
+        showClassPage();
     }).catch(function(error) {
         console.error('Login error:', error);
         if (error.code === 'auth/popup-closed-by-user') {
@@ -37,11 +37,27 @@ function signOut() {
         studentEmail = '';
         studentUid = '';
         studentPhoto = '';
-        document.getElementById('name-page').style.display = 'flex';
-        document.getElementById('home-page').style.display = 'none';
-        document.getElementById('exam-page').style.display = 'none';
-        document.getElementById('result-page').style.display = 'none';
+        hideAllPages();
+        document.getElementById('login-page').style.display = 'flex';
     });
+}
+
+function showClassPage() {
+    document.getElementById('display-name-class').textContent = studentName;
+    if (studentPhoto) {
+        document.getElementById('user-avatar-class').src = studentPhoto;
+        document.getElementById('user-avatar-class').style.display = 'inline-block';
+    }
+    hideAllPages();
+    document.getElementById('class-page').style.display = 'block';
+}
+
+function selectClass(kelas) {
+    if (kelas !== 1) {
+        alert('Kelas ' + kelas + ' belum tersedia. Coming soon!');
+        return;
+    }
+    showHomePage();
 }
 
 function showHomePage() {
@@ -50,8 +66,17 @@ function showHomePage() {
         document.getElementById('user-avatar').src = studentPhoto;
         document.getElementById('user-avatar').style.display = 'inline-block';
     }
-    document.getElementById('name-page').style.display = 'none';
+    hideAllPages();
     document.getElementById('home-page').style.display = 'block';
+}
+
+function hideAllPages() {
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('class-page').style.display = 'none';
+    document.getElementById('home-page').style.display = 'none';
+    document.getElementById('exam-page').style.display = 'none';
+    document.getElementById('result-page').style.display = 'none';
+    document.getElementById('student-history-page').style.display = 'none';
 }
 
 // Check if user already logged in
@@ -61,9 +86,72 @@ firebase.auth().onAuthStateChanged(function(user) {
         studentEmail = user.email || '';
         studentUid = user.uid || '';
         studentPhoto = user.photoURL || '';
-        showHomePage();
+        showClassPage();
     }
 });
+
+// ==================== STUDENT HISTORY ====================
+
+function showStudentHistory() {
+    document.getElementById('history-student-name').textContent = studentName;
+    hideAllPages();
+    document.getElementById('student-history-page').style.display = 'block';
+    renderStudentHistory();
+}
+
+async function renderStudentHistory() {
+    var container = document.getElementById('student-history-list');
+    var filter = document.getElementById('student-history-filter').value;
+    container.innerHTML = '<div class="empty-state-student">Memuat riwayat...</div>';
+
+    var history = [];
+    try {
+        if (typeof isFirebaseConfigured === 'function' && isFirebaseConfigured()) {
+            var snapshot = await db.collection('examHistory')
+                .where('studentUid', '==', studentUid)
+                .orderBy('timestamp', 'desc')
+                .get();
+            snapshot.forEach(function(doc) {
+                history.push(doc.data());
+            });
+        }
+    } catch (e) {
+        // Fallback: try without orderBy (needs composite index)
+        try {
+            var snapshot2 = await db.collection('examHistory').get();
+            snapshot2.forEach(function(doc) {
+                var d = doc.data();
+                if (d.studentUid === studentUid) history.push(d);
+            });
+            history.sort(function(a, b) { return (b.id || 0) - (a.id || 0); });
+        } catch (e2) {
+            console.error('renderStudentHistory error:', e2);
+        }
+    }
+
+    // Apply subject filter
+    if (filter && filter !== 'all') {
+        history = history.filter(function(h) { return h.subject === filter; });
+    }
+
+    if (history.length === 0) {
+        container.innerHTML = '<div class="empty-state-student">Belum ada riwayat ujian.</div>';
+        return;
+    }
+
+    container.innerHTML = '';
+    history.forEach(function(record) {
+        var div = document.createElement('div');
+        div.className = 'history-card-student';
+        var subjectNames = { pai:'PAI', ppkn:'Pendidikan Pancasila', matematika:'Matematika', bahasa_indonesia:'Bahasa Indonesia', bahasa_arab:'Bahasa Arab', bahasa_inggris:'Bahasa Inggris' };
+        var icons = { pai:'🕌', ppkn:'🏛️', matematika:'🧮', bahasa_indonesia:'📝', bahasa_arab:'🌙', bahasa_inggris:'🌍' };
+        div.innerHTML = '<div class="hcs-header">' +
+            '<span class="hcs-subject">' + (icons[record.subject] || '') + ' ' + (subjectNames[record.subject] || record.subject) + '</span>' +
+            '<span class="hcs-score ' + (record.score >= 60 ? 'good' : 'bad') + '">' + record.score + '/100</span></div>' +
+            '<div class="hcs-stats"><span>✅ ' + record.correct + ' benar</span><span>❌ ' + record.wrong + ' salah</span><span>📅 ' + (record.date || '-') + '</span></div>';
+        container.appendChild(div);
+    });
+}
 
 // ==================== DATA MANAGEMENT ====================
 
@@ -314,10 +402,8 @@ function cancelExam() {
 }
 
 function goHome() {
+    hideAllPages();
     document.getElementById('home-page').style.display = 'block';
-    document.getElementById('exam-page').style.display = 'none';
-    document.getElementById('result-page').style.display = 'none';
-    document.getElementById('name-page').style.display = 'none';
     clearInterval(timerInterval);
 }
 
