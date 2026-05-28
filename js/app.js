@@ -36,9 +36,9 @@ function shuffleArray(array) {
 
 function generateExamQuestions(subject) {
     const bank = getQuestionBank(subject);
-    // Acak soal dan ambil maksimal 10
+    // Acak soal dan ambil maksimal 15
     const shuffled = shuffleArray(bank);
-    return shuffled.slice(0, 10);
+    return shuffled.slice(0, 15);
 }
 
 function saveHistory(record) {
