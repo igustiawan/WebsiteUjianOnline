@@ -42,8 +42,13 @@ function generateExamQuestions(subject) {
 }
 
 function saveHistory(record) {
+    // Simpan ke Firebase jika configured
+    if (typeof isFirebaseConfigured === 'function' && isFirebaseConfigured()) {
+        saveExamToFirestore(record);
+    }
+    // Selalu simpan juga ke localStorage sebagai backup
     const history = JSON.parse(localStorage.getItem('examHistory') || '[]');
-    history.unshift(record); // tambah di depan (terbaru)
+    history.unshift(record);
     localStorage.setItem('examHistory', JSON.stringify(history));
 }
 

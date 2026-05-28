@@ -67,7 +67,42 @@ function getHistory() {
     return JSON.parse(localStorage.getItem('examHistory') || '[]');
 }
 
-function getSubjectName(subject) {
+// Firebase-powered dashboard render
+async function renderDashboard() {
+    const statsGrid = document.getElementById('stats-grid');
+    const summaryBox = document.getElementById('summary-box');
+    statsGrid.innerHTML = '<div class="empty-state">⏳ Memuat data...</div>';
+
+    const subjects = ['pai', 'ppkn', 'matematika', 'bahasa_indonesia', 'bahasa_arab', 'bahasa_inggris'];
+    let history;
+
+    // Try Firebase first, fallback to localStorage
+    if (typeof isFirebaseConfigured === 'function' && isFirebaseConfigured()) {
+        try {
+            history = await getExamHistoryFromFirestore();
+        } catch (e) {
+            history = getHistory();
+        }
+    } else {
+        history = getHistory();
+    }
+
+    statsGrid.innerHTML = '';
+    let totalCorrect = 0;
+    let totalWrong = 0;
+    let totalAttempts = 0;
+
+    subjects.forEach(subject => {
+        const subjectHistory = history.filter(h => h.subject === subject);
+        const attempts = subjectHistory.length;
+        const correct = subjectHistory.reduce((sum, h) => sum + (h.correct || 0), 0);
+        const wrong = subjectHistory.reduce((sum, h) => sum + (h.wrong || 0), 0);
+        const avgScore = attempts > 0 ? Math.round(subjectHistory.reduce((sum, h) => sum + (h.score || 0), 0) / attempts) : 0;
+        const lastAttempt = subjectHistory.length > 0 ? (subjectHistory[0].date || '-') : '-';
+
+        totalCorrect += correct;
+        totalWrong += wrong;
+        totalAttempts += attempts;
     const names = {
         'pai': 'PAI',
         'ppkn': 'Pendidikan Pancasila',
@@ -313,15 +348,29 @@ function closeModal() {
 
 // ==================== HISTORY ====================
 
-function renderHistory() {
-    const history = getHistory();
+async function renderHistory() {
     const filter = document.getElementById('history-filter').value;
     const container = document.getElementById('history-list');
+    container.innerHTML = '<div class="empty-state">⏳ Memuat riwayat...</div>';
 
-    const filtered = filter === 'all' ? history : history.filter(h => h.subject === filter);
+    let filtered;
+
+    // Try Firebase first, fallback to localStorage
+    if (typeof isFirebaseConfigured === 'function' && isFirebaseConfigured()) {
+        try {
+            const history = await getExamHistoryFromFirestore(filter);
+            filtered = history;
+        } catch (e) {
+            const history = getHistory();
+            filtered = filter === 'all' ? history : history.filter(h => h.subject === filter);
+        }
+    } else {
+        const history = getHistory();
+        filtered = filter === 'all' ? history : history.filter(h => h.subject === filter);
+    }
 
     if (filtered.length === 0) {
-        container.innerHTML = '<div class="empty-state">📭 Belum ada riwayat ujian.</div>';
+        container.innerHTML = '<div class="empty-state">Belum ada riwayat ujian.</div>';
         return;
     }
 
@@ -329,13 +378,14 @@ function renderHistory() {
 
     filtered.forEach((record, idx) => {
         const timeUsed = record.timeUsed ? formatTime(record.timeUsed) : '-';
+        const dateStr = record.date || (record.timestamp ? new Date(record.timestamp.seconds * 1000).toLocaleString('id-ID') : '-');
         const card = document.createElement('div');
         card.className = 'history-card';
         card.innerHTML = `
             <div class="history-card-header">
                 <div>
-                    <span class="history-subject">${getSubjectIcon(record.subject)} ${record.subjectName}</span>
-                    <span class="history-date">${record.date}</span>
+                    <span class="history-subject">${getSubjectIcon(record.subject)} ${record.subjectName || getSubjectName(record.subject)}</span>
+                    <span class="history-date">${dateStr}</span>
                 </div>
                 <div class="history-score ${record.score >= 60 ? 'good' : 'bad'}">${record.score}/100</div>
             </div>
@@ -344,18 +394,22 @@ function renderHistory() {
                 <span class="text-danger">❌ Salah: ${record.wrong}</span>
                 <span>⏱️ Waktu: ${timeUsed}</span>
             </div>
-            <button class="btn btn-sm btn-secondary" onclick="toggleDetails(${idx}, '${filter}')">📋 Lihat Detail</button>
+            <button class="btn btn-sm btn-secondary" onclick="toggleDetails(${idx}, '${filter}')">Lihat Detail</button>
             <div class="history-details" id="details-${idx}" style="display:none;"></div>
         `;
         container.appendChild(card);
     });
+
+    // Store filtered data for detail toggle
+    window._currentFilteredHistory = filtered;
 }
 
 function toggleDetails(idx, filter) {
-    const history = getHistory();
-    const filtered = filter === 'all' ? history : history.filter(h => h.subject === filter);
+    const filtered = window._currentFilteredHistory || [];
     const record = filtered[idx];
     const detailsEl = document.getElementById(`details-${idx}`);
+
+    if (!record || !detailsEl) return;
 
     if (detailsEl.style.display === 'none') {
         detailsEl.style.display = 'block';
@@ -374,9 +428,16 @@ function toggleDetails(idx, filter) {
     }
 }
 
-function clearHistory() {
+async function clearHistory() {
     if (!confirm('Yakin ingin menghapus SEMUA riwayat ujian? Data tidak bisa dikembalikan.')) return;
+
+    // Clear Firebase
+    if (typeof isFirebaseConfigured === 'function' && isFirebaseConfigured()) {
+        await clearAllHistory();
+    }
+    // Also clear localStorage
     localStorage.removeItem('examHistory');
+
     renderHistory();
     renderDashboard();
 }
