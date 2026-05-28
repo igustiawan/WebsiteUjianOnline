@@ -63,8 +63,38 @@
             <div id="questions-section" style="display: none;">
                 <h2 class="section-title">📝 Kelola Bank Soal</h2>
                 <div class="subject-tabs" id="subject-tabs"></div>
+                <div class="ai-generate-box" id="ai-generate-box">
+                    <h3>🤖 Generate Soal dengan AI</h3>
+                    <p>Generate soal otomatis berdasarkan materi kisi-kisi SAT TA 2025/2026</p>
+                    <div class="ai-settings">
+                        <div class="form-group">
+                            <label>API Key (OpenAI)</label>
+                            <input type="password" id="ai-api-key" placeholder="sk-..." value="">
+                            <small>API key disimpan di browser, tidak dikirim ke server manapun kecuali OpenAI</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Jumlah Soal</label>
+                            <select id="ai-count">
+                                <option value="5">5 Soal</option>
+                                <option value="10" selected>10 Soal</option>
+                                <option value="15">15 Soal</option>
+                                <option value="20">20 Soal</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Mode</label>
+                            <select id="ai-mode">
+                                <option value="tambah">Tambahkan ke bank soal</option>
+                                <option value="ganti">Ganti semua soal (reset)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-ai" onclick="generateWithAI()" id="btn-ai-generate">🤖 Generate Soal AI</button>
+                    <div id="ai-status" class="ai-status" style="display:none;"></div>
+                </div>
+
                 <div class="question-list" id="question-list"></div>
-                <button class="btn btn-success" onclick="showAddQuestion()">➕ Tambah Soal Baru</button>
+                <button class="btn btn-success" onclick="showAddQuestion()">➕ Tambah Soal Manual</button>
 
                 <!-- Add/Edit Question Modal -->
                 <div id="question-modal" class="modal" style="display:none;">
@@ -129,6 +159,7 @@
         </div>
     </div>
 
+    <script src="js/materi-kisi.js"></script>
     <script src="js/soal-pai.js"></script>
     <script src="js/soal-ppkn.js"></script>
     <script src="js/soal-matematika.js"></script>

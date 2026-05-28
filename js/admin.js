@@ -388,4 +388,187 @@ function formatTime(seconds) {
 }
 
 // ==================== INIT ====================
-document.addEventListener('DOMContentLoaded', checkAuth);
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuth();
+    // Load saved API key
+    const savedKey = localStorage.getItem('openai_api_key');
+    if (savedKey) {
+        const keyInput = document.getElementById('ai-api-key');
+        if (keyInput) keyInput.value = savedKey;
+    }
+});
+
+// ==================== AI GENERATE SOAL ====================
+
+async function generateWithAI() {
+    const apiKey = document.getElementById('ai-api-key').value.trim();
+    const count = parseInt(document.getElementById('ai-count').value);
+    const mode = document.getElementById('ai-mode').value;
+    const statusEl = document.getElementById('ai-status');
+    const btnEl = document.getElementById('btn-ai-generate');
+
+    if (!apiKey) {
+        showAIStatus('❌ Masukkan API Key OpenAI terlebih dahulu!', 'error');
+        return;
+    }
+
+    // Save API key for convenience
+    localStorage.setItem('openai_api_key', apiKey);
+
+    const materi = MATERI_KISI[currentSubjectTab];
+    if (!materi) {
+        showAIStatus('❌ Materi tidak ditemukan untuk mata pelajaran ini.', 'error');
+        return;
+    }
+
+    // Build prompt
+    const prompt = buildPrompt(materi, count);
+
+    // Show loading
+    btnEl.disabled = true;
+    btnEl.textContent = '⏳ Generating...';
+    showAIStatus('🔄 Sedang generate soal dengan AI... Mohon tunggu...', 'loading');
+
+    try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'Kamu adalah guru SD kelas 1 yang ahli membuat soal ujian pilihan ganda. Buat soal yang sesuai untuk anak kelas 1 SD (usia 6-7 tahun). Soal harus sederhana, jelas, dan mudah dipahami anak-anak. SELALU jawab dalam format JSON yang valid.'
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                temperature: 0.8,
+                max_tokens: 4000
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        const content = data.choices[0].message.content;
+
+        // Parse JSON from response
+        const questions = parseAIResponse(content);
+
+        if (questions.length === 0) {
+            throw new Error('AI tidak menghasilkan soal yang valid. Coba lagi.');
+        }
+
+        // Save to question bank
+        if (mode === 'ganti') {
+            saveQuestionBank(currentSubjectTab, questions);
+        } else {
+            const existing = getQuestionBank(currentSubjectTab);
+            const combined = [...existing, ...questions];
+            saveQuestionBank(currentSubjectTab, combined);
+        }
+
+        showAIStatus(`✅ Berhasil generate ${questions.length} soal baru!`, 'success');
+        renderQuestions();
+
+    } catch (error) {
+        showAIStatus(`❌ Error: ${error.message}`, 'error');
+    } finally {
+        btnEl.disabled = false;
+        btnEl.textContent = '🤖 Generate Soal AI';
+    }
+}
+
+function buildPrompt(materi, count) {
+    return `Buatkan ${count} soal pilihan ganda untuk ujian ${materi.name} ${materi.kelas}.
+
+MATERI/KISI-KISI:
+${materi.materi.map((m, i) => `${i + 1}. ${m}`).join('\n')}
+
+ATURAN:
+- Setiap soal memiliki 4 pilihan jawaban (A, B, C, D)
+- Soal harus sesuai tingkat ${materi.kelas} (sederhana dan mudah dipahami)
+- Sebar soal merata dari semua materi di atas
+- Bahasa yang digunakan sederhana untuk anak kelas 1
+- Pastikan jawaban benar tersebar merata (tidak selalu A atau B)
+
+FORMAT JAWABAN (WAJIB JSON VALID):
+[
+  {
+    "question": "Pertanyaan soal?",
+    "options": ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
+    "answer": 0
+  }
+]
+
+Keterangan: "answer" adalah index (0=A, 1=B, 2=C, 3=D)
+
+PENTING: Jawab HANYA dengan JSON array, tanpa teks tambahan di luar JSON.`;
+}
+
+function parseAIResponse(content) {
+    try {
+        // Try to extract JSON from the response
+        let jsonStr = content.trim();
+        
+        // Remove markdown code block if present
+        if (jsonStr.startsWith('```json')) {
+            jsonStr = jsonStr.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+        } else if (jsonStr.startsWith('```')) {
+            jsonStr = jsonStr.replace(/^```\s*/, '').replace(/\s*```$/, '');
+        }
+
+        const parsed = JSON.parse(jsonStr);
+
+        // Validate structure
+        if (!Array.isArray(parsed)) return [];
+
+        return parsed.filter(q => {
+            return q.question && 
+                   Array.isArray(q.options) && 
+                   q.options.length === 4 &&
+                   typeof q.answer === 'number' &&
+                   q.answer >= 0 && q.answer <= 3;
+        });
+    } catch (e) {
+        // Try to find JSON array in the content
+        const match = content.match(/\[[\s\S]*\]/);
+        if (match) {
+            try {
+                const parsed = JSON.parse(match[0]);
+                if (Array.isArray(parsed)) {
+                    return parsed.filter(q => {
+                        return q.question && 
+                               Array.isArray(q.options) && 
+                               q.options.length === 4 &&
+                               typeof q.answer === 'number' &&
+                               q.answer >= 0 && q.answer <= 3;
+                    });
+                }
+            } catch (e2) {}
+        }
+        return [];
+    }
+}
+
+function showAIStatus(message, type) {
+    const statusEl = document.getElementById('ai-status');
+    statusEl.style.display = 'block';
+    statusEl.className = `ai-status ${type}`;
+    statusEl.textContent = message;
+
+    if (type === 'success') {
+        setTimeout(() => {
+            statusEl.style.display = 'none';
+        }, 5000);
+    }
+}
