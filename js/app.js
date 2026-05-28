@@ -56,6 +56,7 @@ function selectClass(kelas) {
         alert('Kelas ' + kelas + ' belum tersedia. Coming soon!');
         return;
     }
+    window.selectedClass = kelas;
     showHomePage();
 }
 
@@ -383,7 +384,7 @@ function finishExam() {
     var total = currentQuestions.length;
     var score = Math.round((correct / total) * 100);
     var wrong = total - correct;
-    var record = { id: Date.now(), studentName: studentName, studentEmail: studentEmail, studentUid: studentUid, subject: currentSubject, subjectName: getSubjectName(currentSubject), date: new Date().toLocaleString('id-ID'), score: score, correct: correct, wrong: wrong, total: total, timeUsed: 1800 - timeLeft, details: details };
+    var record = { id: Date.now(), studentName: studentName, studentEmail: studentEmail, studentUid: studentUid, kelas: window.selectedClass || 1, subject: currentSubject, subjectName: getSubjectName(currentSubject), date: new Date().toLocaleString('id-ID'), score: score, correct: correct, wrong: wrong, total: total, timeUsed: 1800 - timeLeft, details: details };
     saveHistory(record);
     showResult(score, correct, total, details);
 }
@@ -454,20 +455,27 @@ async function renderLeaderboard() {
     container.innerHTML = '<div class="empty-state-student">Memuat ranking...</div>';
 
     var history = [];
+    var currentClass = window.selectedClass || 1;
+
     try {
         if (isFirebaseConfigured()) {
             var snapshot = await db.collection('examHistory').get();
-            snapshot.forEach(function(doc) { history.push(doc.data()); });
+            snapshot.forEach(function(doc) {
+                var d = doc.data();
+                var recordClass = d.kelas || 1;
+                if (recordClass === currentClass) history.push(d);
+            });
         }
     } catch (e) {
         history = JSON.parse(localStorage.getItem('examHistory') || '[]');
+        history = history.filter(function(h) { return (h.kelas || 1) === currentClass; });
     }
 
     if (history.length === 0) {
         history = JSON.parse(localStorage.getItem('examHistory') || '[]');
+        history = history.filter(function(h) { return (h.kelas || 1) === currentClass; });
     }
 
-    // Filter by subject
     if (filter && filter !== 'all') {
         history = history.filter(function(h) { return h.subject === filter; });
     }
@@ -494,7 +502,7 @@ async function renderLeaderboard() {
     });
 
     if (ranking.length === 0) {
-        container.innerHTML = '<div class="empty-state-student">Belum ada data ranking.</div>';
+        container.innerHTML = '<div class="empty-state-student">Belum ada data ranking untuk Kelas ' + currentClass + '.</div>';
         return;
     }
 
