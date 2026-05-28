@@ -1,3 +1,5 @@
+// Soal Bahasa Arab - Kurikulum Merdeka 2026 - Kelas 1 SD
+// SAT TA 2025/2026 Semester 2
 const soalBahasaArab = [
     {
         question: "Apa bahasa Arab dari 'piring'?",
@@ -48,5 +50,30 @@ const soalBahasaArab = [
         question: "Apa bahasa Arab dari 'jeruk'?",
         options: ["مَوْز (Mauzun)", "تُفَّاحَة (Tuffaahah)", "عِنَب ('Inab)", "بُرْتُقَال (Burtuqool)"],
         answer: 3
+    },
+    {
+        question: "Apa bahasa Arab dari 'pisau'?",
+        options: ["مِلْعَقَة (Mil'aqoh)", "سِكِّيْن (Sikkiin)", "صَحْن (Shahnun)", "كُوْب (Kuubun)"],
+        answer: 1
+    },
+    {
+        question: "Apa bahasa Arab dari 'anjing'?",
+        options: ["قِطَّة (Qiththoh)", "دَجَاجَة (Dajaajah)", "كَلْب (Kalbun)", "حِصَان (Hishoon)"],
+        answer: 2
+    },
+    {
+        question: "Apa bahasa Arab dari 'kereta api'?",
+        options: ["سَيَّارَة (Sayyaaroh)", "طَائِرَة (Thoo'iroh)", "دَرَّاجَة (Darroojah)", "قِطَار (Qithoor)"],
+        answer: 3
+    },
+    {
+        question: "Apa bahasa Arab dari 'anggur'?",
+        options: ["مَوْز (Mauzun)", "عِنَب ('Inab)", "تُفَّاحَة (Tuffaahah)", "بُرْتُقَال (Burtuqool)"],
+        answer: 1
+    },
+    {
+        question: "Apa bahasa Arab dari 'panci/periuk'?",
+        options: ["صَحْن (Shahnun)", "كُوْب (Kuubun)", "قِدْر (Qidrun)", "مِلْعَقَة (Mil'aqoh)"],
+        answer: 2
     }
 ];

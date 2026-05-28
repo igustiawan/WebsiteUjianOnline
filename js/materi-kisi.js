@@ -1,9 +1,20 @@
 // ==================== KISI-KISI MATERI SAT TA 2025/2026 KELAS 1 ====================
+// Kurikulum Merdeka / Kurikulum 2026 - Kelas 1 SD Semester 2
+
+const KURIKULUM_INFO = {
+    nama: 'Kurikulum Merdeka / Kurikulum 2026',
+    jenjang: 'SD/MI Kelas 1 (Satu)',
+    semester: 'Semester 2 (Genap)',
+    tahunAjaran: '2025/2026',
+    jenis: 'Sumatif Akhir Tahun (SAT)'
+};
 
 const MATERI_KISI = {
     pai: {
         name: 'PAI - Pendidikan Agama Islam',
         kelas: 'Kelas 1 SD',
+        kurikulum: 'Kurikulum Merdeka 2026',
+        capaianPembelajaran: 'Peserta didik mampu mengenal harakat dan membaca surah pendek, mengenal sifat-sifat Allah, menerapkan akhlak terpuji, memahami thaharah, serta mengenal kisah nabi.',
         materi: [
             'Pelajaran 6: Mengenal harakat, membaca surah Al-Ikhlas, dan mengetahui pesan pokok surah Al-Ikhlas',
             'Pelajaran 7: Beriman kepada Allah Swt, asmaul husna ar Rahman dan ar Rahim',
@@ -15,6 +26,8 @@ const MATERI_KISI = {
     ppkn: {
         name: 'Pendidikan Pancasila',
         kelas: 'Kelas 1 SD',
+        kurikulum: 'Kurikulum Merdeka 2026',
+        capaianPembelajaran: 'Peserta didik mampu mengenal simbol-simbol negara Indonesia dan menunjukkan sikap peduli terhadap lingkungan tempat tinggal dan sekolah melalui gotong royong.',
         materi: [
             'Pembelajaran 3: Mengenal Indonesia - Bendera Indonesia, Lagu kebangsaan, Simbol lambang Garuda Pancasila',
             'Pembelajaran 4: Lingkungan - Lingkungan tempat tinggal, Gotong royong, Lingkungan sekolah, Peduli lingkungan sekolah'
@@ -23,6 +36,8 @@ const MATERI_KISI = {
     matematika: {
         name: 'Matematika',
         kelas: 'Kelas 1 SD',
+        kurikulum: 'Kurikulum Merdeka 2026',
+        capaianPembelajaran: 'Peserta didik mampu mengenal bilangan 11-20, melakukan penjumlahan dan pengurangan sampai 20, mengenal pengukuran panjang, serta menyajikan data sederhana.',
         materi: [
             'Pelajaran 5: Mengenal bilangan 11-20, nilai tempat puluhan satuan, membandingkan dan mengurutkan',
             'Pelajaran 6: Penjumlahan dan pengurangan bilangan sampai 20',
@@ -33,6 +48,8 @@ const MATERI_KISI = {
     bahasa_indonesia: {
         name: 'Bahasa Indonesia',
         kelas: 'Kelas 1 SD',
+        kurikulum: 'Kurikulum Merdeka 2026',
+        capaianPembelajaran: 'Peserta didik mampu membaca dan menulis kalimat sederhana, mengenal kalimat perintah, mendeskripsikan diri dan lingkungan, serta mengenal profesi.',
         materi: [
             'Pelajaran 5: Menjaga kebersihan, mengenal kalimat perintah dan tanda seru, melafalkan suku kata ma, mi, mu, me, mo',
             'Pelajaran 6: Deskripsi diri dan teman, melafalkan suku kata ga, gi, gu, ge, go, melengkapi kalimat rumpang',
@@ -43,6 +60,8 @@ const MATERI_KISI = {
     bahasa_arab: {
         name: 'Bahasa Arab',
         kelas: 'Kelas 1 SD',
+        kurikulum: 'Kurikulum Merdeka 2026',
+        capaianPembelajaran: 'Peserta didik mampu mengenal dan menyebutkan kosakata bahasa Arab tentang perabot dapur, hewan, buah-buahan, dan alat transportasi.',
         materi: [
             'Bab 6: Perabot di Dapur 1',
             'Bab 7: Perabot di Dapur 2',
@@ -54,6 +73,8 @@ const MATERI_KISI = {
     bahasa_inggris: {
         name: 'Bahasa Inggris',
         kelas: 'Kelas 1 SD',
+        kurikulum: 'Kurikulum Merdeka 2026',
+        capaianPembelajaran: 'Peserta didik mampu menggunakan kosakata sederhana tentang benda, hewan, keluarga, buah dan sayuran, serta menggunakan have/has dan subject pronoun dalam kalimat sederhana.',
         materi: [
             'Lesson 8: I Have Two Books - Menghitung jumlah benda dan menggunakan "have" untuk menyatakan kepemilikan',
             'Lesson 9: I Have a Rabbit - Menyebutkan nama hewan peliharaan dan mengidentifikasi kemampuan hewan secara sederhana',

@@ -441,7 +441,7 @@ async function generateWithAI() {
                 messages: [
                     {
                         role: 'system',
-                        content: 'Kamu adalah guru SD kelas 1 yang ahli membuat soal ujian pilihan ganda. Buat soal yang sesuai untuk anak kelas 1 SD (usia 6-7 tahun). Soal harus sederhana, jelas, dan mudah dipahami anak-anak. SELALU jawab dalam format JSON yang valid.'
+                        content: 'Kamu adalah guru SD kelas 1 yang sangat berpengalaman dan ahli dalam membuat soal ujian pilihan ganda berdasarkan Kurikulum Merdeka / Kurikulum 2026 Indonesia. Kamu memahami Capaian Pembelajaran (CP) dan Alur Tujuan Pembelajaran (ATP) untuk jenjang SD kelas 1. Buat soal yang sesuai untuk anak kelas 1 SD (usia 6-7 tahun) dengan pendekatan kontekstual dan menyenangkan. Soal harus sederhana, jelas, konkret, dan mudah dipahami anak-anak Indonesia. SELALU jawab dalam format JSON yang valid.'
                     },
                     {
                         role: 'user',
@@ -489,17 +489,28 @@ async function generateWithAI() {
 }
 
 function buildPrompt(materi, count) {
-    return `Buatkan ${count} soal pilihan ganda untuk ujian ${materi.name} ${materi.kelas}.
+    const cpText = materi.capaianPembelajaran ? `\nCAPAIAN PEMBELAJARAN:\n${materi.capaianPembelajaran}\n` : '';
 
-MATERI/KISI-KISI:
+    return `Buatkan ${count} soal pilihan ganda untuk Sumatif Akhir Tahun (SAT) mata pelajaran ${materi.name} ${materi.kelas}.
+
+KURIKULUM: ${materi.kurikulum || 'Kurikulum Merdeka 2026'}
+JENJANG: SD/MI Kelas 1 (usia 6-7 tahun)
+TAHUN AJARAN: 2025/2026
+JENIS UJIAN: Sumatif Akhir Tahun (SAT) Semester 2
+${cpText}
+MATERI/KISI-KISI SESUAI KURIKULUM 2026:
 ${materi.materi.map((m, i) => `${i + 1}. ${m}`).join('\n')}
 
-ATURAN:
+ATURAN PEMBUATAN SOAL:
+- Soal WAJIB berdasarkan Kurikulum Merdeka / Kurikulum 2026 Indonesia
 - Setiap soal memiliki 4 pilihan jawaban (A, B, C, D)
-- Soal harus sesuai tingkat ${materi.kelas} (sederhana dan mudah dipahami)
-- Sebar soal merata dari semua materi di atas
-- Bahasa yang digunakan sederhana untuk anak kelas 1
+- Soal harus sesuai tingkat perkembangan anak kelas 1 SD (sederhana, konkret, dan mudah dipahami)
+- Gunakan pendekatan kontekstual sesuai kehidupan sehari-hari anak Indonesia
+- Sebar soal merata dari SEMUA materi/kisi-kisi di atas
+- Bahasa yang digunakan sederhana, kalimat pendek, menggunakan Bahasa Indonesia baku
 - Pastikan jawaban benar tersebar merata (tidak selalu A atau B)
+- Soal mengukur pemahaman, bukan hanya hafalan
+- Hindari soal yang ambigu atau membingungkan anak kelas 1
 
 FORMAT JAWABAN (WAJIB JSON VALID):
 [

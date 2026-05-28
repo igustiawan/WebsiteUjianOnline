@@ -1,3 +1,5 @@
+// Soal Matematika - Kurikulum Merdeka 2026 - Kelas 1 SD
+// SAT TA 2025/2026 Semester 2
 const soalMatematika = [
     {
         question: "Bilangan setelah 15 adalah ...",
@@ -25,12 +27,12 @@ const soalMatematika = [
         answer: 1
     },
     {
-        question: "12 + 5 = ...",
+        question: "Ibu membeli 12 telur. Lalu membeli lagi 5 telur. Jumlah telur ibu sekarang adalah ...",
         options: ["16", "18", "17", "15"],
         answer: 2
     },
     {
-        question: "20 - 6 = ...",
+        question: "Andi punya 20 kelereng. Diberikan ke Budi 6 kelereng. Sisa kelereng Andi adalah ...",
         options: ["15", "14", "13", "16"],
         answer: 1
     },
@@ -48,5 +50,30 @@ const soalMatematika = [
         question: "Diagram gambar digunakan untuk ...",
         options: ["Menghitung perkalian", "Menyajikan data dengan gambar", "Mengukur panjang", "Menggambar bebas"],
         answer: 1
+    },
+    {
+        question: "Bilangan 15 terdiri dari ...",
+        options: ["1 puluhan 5 satuan", "5 puluhan 1 satuan", "15 satuan saja", "0 puluhan 15 satuan"],
+        answer: 0
+    },
+    {
+        question: "Manakah bilangan yang lebih besar?",
+        options: ["12", "11", "19", "14"],
+        answer: 2
+    },
+    {
+        question: "6 + 8 = ...",
+        options: ["13", "15", "14", "12"],
+        answer: 2
+    },
+    {
+        question: "Tali A panjangnya 10 jengkal. Tali B panjangnya 7 jengkal. Tali yang lebih panjang adalah ...",
+        options: ["Tali B", "Tali A", "Sama panjang", "Tidak bisa dibandingkan"],
+        answer: 1
+    },
+    {
+        question: "Di kelas ada 5 anak suka apel, 3 anak suka jeruk, 2 anak suka mangga. Buah yang paling disukai adalah ...",
+        options: ["Jeruk", "Mangga", "Apel", "Sama semua"],
+        answer: 2
     }
 ];

@@ -1,3 +1,5 @@
+// Soal Bahasa Inggris - Kurikulum Merdeka 2026 - Kelas 1 SD
+// SAT TA 2025/2026 Semester 2
 const soalBahasaInggris = [
     {
         question: "I have two ... (buku)",
@@ -47,6 +49,31 @@ const soalBahasaInggris = [
     {
         question: "Which one is a vegetable?",
         options: ["Mango", "Orange", "Carrot", "Banana"],
+        answer: 2
+    },
+    {
+        question: "My mother's sister is my ...",
+        options: ["Grandmother", "Sister", "Aunt", "Mother"],
+        answer: 2
+    },
+    {
+        question: "'They ... students.' Choose the correct word.",
+        options: ["is", "am", "are", "has"],
+        answer: 2
+    },
+    {
+        question: "A fish can ...",
+        options: ["Fly", "Run", "Swim", "Jump high"],
+        answer: 2
+    },
+    {
+        question: "I have three ... (pensil)",
+        options: ["Books", "Bags", "Pencils", "Rulers"],
+        answer: 2
+    },
+    {
+        question: "Which one is NOT a fruit?",
+        options: ["Apple", "Banana", "Spinach", "Mango"],
         answer: 2
     }
 ];

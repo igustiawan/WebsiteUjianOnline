@@ -1,3 +1,5 @@
+// Soal Bahasa Indonesia - Kurikulum Merdeka 2026 - Kelas 1 SD
+// SAT TA 2025/2026 Semester 2
 const soalBahasaIndonesia = [
     {
         question: "Kalimat 'Buanglah sampah pada tempatnya!' termasuk kalimat ...",
@@ -20,7 +22,7 @@ const soalBahasaIndonesia = [
         answer: 0
     },
     {
-        question: "Uang digunakan untuk ...",
+        question: "Uang logam dan uang kertas digunakan untuk ...",
         options: ["Bermain", "Membeli barang", "Menggambar", "Menulis"],
         answer: 1
     },
@@ -47,6 +49,31 @@ const soalBahasaIndonesia = [
     {
         question: "Orang yang bekerja mengajar di sekolah disebut ...",
         options: ["Polisi", "Petani", "Guru", "Pilot"],
+        answer: 2
+    },
+    {
+        question: "Suku kata dari kata 'GULA' adalah ...",
+        options: ["G - ULA", "GU - LA", "GUL - A", "GU - L - A"],
+        answer: 1
+    },
+    {
+        question: "Perhatikan kalimat: 'Dina bermain di ... rumah.' Kata yang tepat adalah ...",
+        options: ["atas", "depan", "dalam", "bawah"],
+        answer: 1
+    },
+    {
+        question: "Namaku Rina. Aku berambut panjang. Kalimat di atas merupakan ...",
+        options: ["Kalimat perintah", "Deskripsi diri", "Kalimat tanya", "Kata petunjuk arah"],
+        answer: 1
+    },
+    {
+        question: "Suku kata 'mo' terdapat pada kata ...",
+        options: ["Makan", "Mobil", "Meja", "Madu"],
+        answer: 1
+    },
+    {
+        question: "Orang yang bekerja menangkap penjahat disebut ...",
+        options: ["Guru", "Dokter", "Polisi", "Nelayan"],
         answer: 2
     }
 ];
