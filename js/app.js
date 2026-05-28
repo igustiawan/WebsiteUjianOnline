@@ -8,20 +8,6 @@ let timeLeft = 1800; // 30 menit dalam detik
 
 // ==================== DATA MANAGEMENT ====================
 
-function getQuestionBank(subject) {
-    const custom = localStorage.getItem(`questions_${subject}`);
-    if (custom) return JSON.parse(custom);
-    switch(subject) {
-        case 'pai': return soalPAI;
-        case 'ppkn': return soalPPKN;
-        case 'matematika': return soalMatematika;
-        case 'bahasa_indonesia': return soalBahasaIndonesia;
-        case 'bahasa_arab': return soalBahasaArab;
-        case 'bahasa_inggris': return soalBahasaInggris;
-        default: return [];
-    }
-}
-
 function shuffleArray(array) {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -32,12 +18,11 @@ function shuffleArray(array) {
 }
 
 async function generateExamQuestions(subject) {
-    let bank;
-    // Try Firebase first
-    if (typeof getQuestionBankAsync === 'function' && typeof isFirebaseConfigured === 'function' && isFirebaseConfigured()) {
-        bank = await getQuestionBankAsync(subject);
-    } else {
-        bank = getQuestionBank(subject);
+    // Ambil soal dari Firebase Firestore
+    const bank = await getQuestionsFromFirestore(subject);
+    if (!bank || bank.length === 0) {
+        alert('⚠️ Soal belum tersedia untuk mata pelajaran ini. Hubungi admin untuk mengupload soal ke database.');
+        return [];
     }
     const shuffled = shuffleArray(bank);
     return shuffled.slice(0, 15);

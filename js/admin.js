@@ -212,17 +212,17 @@ function getQuestionBank(subject) {
     // Check localStorage first for custom questions
     const custom = localStorage.getItem(`questions_${subject}`);
     if (custom) return JSON.parse(custom);
+    return [];
+}
 
-    // Fall back to default
-    switch(subject) {
-        case 'pai': return [...soalPAI];
-        case 'ppkn': return [...soalPPKN];
-        case 'matematika': return [...soalMatematika];
-        case 'bahasa_indonesia': return [...soalBahasaIndonesia];
-        case 'bahasa_arab': return [...soalBahasaArab];
-        case 'bahasa_inggris': return [...soalBahasaInggris];
-        default: return [];
-    }
+async function getQuestionBankFromDB(subject) {
+    // Try Firestore first
+    const firestoreQ = await getQuestionsFromFirestore(subject);
+    if (firestoreQ && firestoreQ.length > 0) return firestoreQ;
+    // Fallback to localStorage
+    const custom = localStorage.getItem(`questions_${subject}`);
+    if (custom) return JSON.parse(custom);
+    return [];
 }
 
 function saveQuestionBank(subject, questions) {
@@ -251,13 +251,16 @@ function renderSubjectTabs() {
     });
 }
 
-function renderQuestions() {
-    const questions = getQuestionBank(currentSubjectTab);
+async function renderQuestions() {
     const container = document.getElementById('question-list');
+    container.innerHTML = '<div class="empty-state">⏳ Memuat soal...</div>';
+
+    const questions = await getQuestionBankFromDB(currentSubjectTab);
+
     container.innerHTML = '';
 
     if (questions.length === 0) {
-        container.innerHTML = '<div class="empty-state">Belum ada soal. Klik "Tambah Soal Baru" untuk memulai.</div>';
+        container.innerHTML = '<div class="empty-state">Belum ada soal. Gunakan AI Generate atau tambah manual.</div>';
         return;
     }
 
@@ -295,8 +298,8 @@ function showAddQuestion() {
     document.getElementById('question-modal').style.display = 'flex';
 }
 
-function editQuestion(index) {
-    const questions = getQuestionBank(currentSubjectTab);
+async function editQuestion(index) {
+    const questions = await getQuestionBankFromDB(currentSubjectTab);
     const q = questions[index];
     currentEditIndex = index;
 
@@ -310,7 +313,7 @@ function editQuestion(index) {
     document.getElementById('question-modal').style.display = 'flex';
 }
 
-function saveQuestion(e) {
+async function saveQuestion(e) {
     e.preventDefault();
 
     const question = {
@@ -324,7 +327,7 @@ function saveQuestion(e) {
         answer: parseInt(document.getElementById('q-answer').value)
     };
 
-    const questions = getQuestionBank(currentSubjectTab);
+    const questions = await getQuestionBankFromDB(currentSubjectTab);
 
     if (currentEditIndex !== null) {
         questions[currentEditIndex] = question;
@@ -337,10 +340,10 @@ function saveQuestion(e) {
     renderQuestions();
 }
 
-function deleteQuestion(index) {
+async function deleteQuestion(index) {
     if (!confirm(`Yakin ingin menghapus soal ${index + 1}?`)) return;
 
-    const questions = getQuestionBank(currentSubjectTab);
+    const questions = await getQuestionBankFromDB(currentSubjectTab);
     questions.splice(index, 1);
     saveQuestionBank(currentSubjectTab, questions);
     renderQuestions();
@@ -460,12 +463,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (savedKey) {
         const keyInput = document.getElementById('ai-api-key');
         if (keyInput) keyInput.value = savedKey;
-    }
-    // Auto-seed questions to Firestore on first load
-    if (typeof seedQuestionsToFirestore === 'function' && typeof isFirebaseConfigured === 'function' && isFirebaseConfigured()) {
-        seedQuestionsToFirestore().then(() => {
-            console.log('✅ Question bank check/seed complete');
-        });
     }
 });
 
