@@ -9,6 +9,7 @@ var studentName = '';
 var studentEmail = '';
 var studentUid = '';
 var studentPhoto = '';
+var showAnswersEnabled = true; // controlled by admin setting
 
 // ==================== GOOGLE SIGN IN ====================
 
@@ -23,9 +24,7 @@ function signInWithGoogle() {
         showClassPage();
     }).catch(function(error) {
         console.error('Login error:', error);
-        if (error.code === 'auth/popup-closed-by-user') {
-            // User closed popup, do nothing
-        } else {
+        if (error.code !== 'auth/popup-closed-by-user') {
             alert('Gagal login: ' + error.message);
         }
     });
@@ -68,18 +67,17 @@ function showHomePage() {
     }
     hideAllPages();
     document.getElementById('home-page').style.display = 'block';
+    loadBadges();
 }
 
 function hideAllPages() {
-    document.getElementById('login-page').style.display = 'none';
-    document.getElementById('class-page').style.display = 'none';
-    document.getElementById('home-page').style.display = 'none';
-    document.getElementById('exam-page').style.display = 'none';
-    document.getElementById('result-page').style.display = 'none';
-    document.getElementById('student-history-page').style.display = 'none';
+    var pages = ['login-page','class-page','home-page','exam-page','result-page','student-history-page','materi-page'];
+    pages.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
 }
 
-// Check if user already logged in
 firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
         studentName = user.displayName || 'Siswa';
@@ -89,6 +87,103 @@ firebase.auth().onAuthStateChanged(function(user) {
         showClassPage();
     }
 });
+
+// ==================== BADGES & ACHIEVEMENTS ====================
+
+function getBadgeForScore(score) {
+    if (score === 100) return { emoji: '💎', name: 'Sempurna!', color: '#8b5cf6' };
+    if (score >= 90) return { emoji: '🏆', name: 'Juara', color: '#f59e0b' };
+    if (score >= 80) return { emoji: '🌟', name: 'Bintang', color: '#6366f1' };
+    if (score >= 70) return { emoji: '🎯', name: 'Hebat', color: '#10b981' };
+    if (score >= 60) return { emoji: '👍', name: 'Bagus', color: '#3b82f6' };
+    return null;
+}
+
+async function loadBadges() {
+    var container = document.getElementById('badge-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    var history = [];
+    try {
+        if (isFirebaseConfigured()) {
+            var snapshot = await db.collection('examHistory').get();
+            snapshot.forEach(function(doc) {
+                var d = doc.data();
+                if (d.studentUid === studentUid) history.push(d);
+            });
+        }
+    } catch (e) {
+        history = JSON.parse(localStorage.getItem('examHistory') || '[]').filter(function(h) { return h.studentUid === studentUid; });
+    }
+
+    if (history.length === 0) {
+        container.innerHTML = '<p class="badge-empty">Kerjakan ujian untuk mendapatkan badge! 🎯</p>';
+        return;
+    }
+
+    // Collect unique badges
+    var badges = [];
+    var badgeSet = {};
+    history.forEach(function(h) {
+        var b = getBadgeForScore(h.score);
+        if (b && !badgeSet[b.name]) {
+            badgeSet[b.name] = true;
+            badges.push(b);
+        }
+    });
+
+    // Count achievements
+    var totalExams = history.length;
+    var perfectScores = history.filter(function(h) { return h.score === 100; }).length;
+    var above80 = history.filter(function(h) { return h.score >= 80; }).length;
+
+    // Special badges
+    if (totalExams >= 5) badges.push({ emoji: '🔥', name: 'Rajin (5+ ujian)', color: '#ef4444' });
+    if (totalExams >= 10) badges.push({ emoji: '⚡', name: 'Super Rajin (10+)', color: '#f59e0b' });
+    if (perfectScores >= 1) badges.push({ emoji: '💯', name: 'Nilai Sempurna', color: '#8b5cf6' });
+    if (above80 >= 3) badges.push({ emoji: '🎖️', name: 'Konsisten Hebat', color: '#10b981' });
+
+    if (badges.length === 0) {
+        container.innerHTML = '<p class="badge-empty">Raih skor 60+ untuk mendapatkan badge pertamamu! 🎯</p>';
+        return;
+    }
+
+    badges.forEach(function(b) {
+        var badgeEl = document.createElement('div');
+        badgeEl.className = 'achievement-badge';
+        badgeEl.style.borderColor = b.color;
+        badgeEl.innerHTML = '<span class="ab-emoji">' + b.emoji + '</span><span class="ab-name">' + b.name + '</span>';
+        container.appendChild(badgeEl);
+    });
+}
+
+// ==================== MATERI / PEMBAHASAN ====================
+
+function showMateri(subject) {
+    hideAllPages();
+    document.getElementById('materi-page').style.display = 'block';
+
+    var materiData = {
+        pai: { title: '🕌 PAI', topics: ['Mengenal harakat (fathah, kasrah, dhammah)', 'Membaca Surah Al-Ikhlas (4 ayat, tentang keesaan Allah)', 'Asmaul Husna: Ar-Rahman (Maha Pengasih) & Ar-Rahim (Maha Penyayang)', 'Berterima kasih, disiplin, jujur, dan saling memaafkan', 'Perilaku hidup bersih, wudhu, dan tayamum', 'Kisah Nabi Adam As dan Nabi Muhammad Saw'] },
+        ppkn: { title: '🏛️ Pendidikan Pancasila', topics: ['Bendera Indonesia (Merah Putih) - merah=berani, putih=suci', 'Lagu kebangsaan Indonesia Raya (W.R. Supratman)', 'Lambang Garuda Pancasila (5 sila)', 'Bhinneka Tunggal Ika = Berbeda-beda tetapi tetap satu', 'Gotong royong di lingkungan rumah dan sekolah', 'Peduli lingkungan: kebersihan, hemat air, rawat tanaman'] },
+        matematika: { title: '🧮 Matematika', topics: ['Bilangan 11-20 (sebelas sampai dua puluh)', 'Nilai tempat: puluhan dan satuan (misal 18 = 1 puluhan 8 satuan)', 'Membandingkan bilangan: lebih besar (>), lebih kecil (<), sama (=)', 'Penjumlahan bilangan sampai 20', 'Pengurangan bilangan sampai 20', 'Mengukur panjang dengan alat ukur baku dan tidak baku', 'Menyajikan data dengan tabel dan diagram gambar'] },
+        bahasa_indonesia: { title: '📝 Bahasa Indonesia', topics: ['Kalimat perintah (diakhiri tanda seru !)', 'Suku kata: ma-mi-mu-me-mo, ga-gi-gu-ge-go', 'Deskripsi diri dan teman', 'Melengkapi kalimat rumpang', 'Mengenal bentuk uang (logam dan kertas)', 'Menyusun kata acak menjadi kalimat', 'Kata petunjuk letak dan arah (di depan, di belakang, di atas, dll)', 'Mengenal profesi: guru, dokter, polisi, petani, pilot, dll'] },
+        bahasa_arab: { title: '🌙 Bahasa Arab', topics: ['Perabot dapur: piring (صحن), gelas (كوب), sendok (ملعقة), pisau (سكين)', 'Hewan: kucing (قطة), anjing (كلب), ayam (دجاجة), burung (عصفور), ikan (سمكة)', 'Buah-buahan: apel (تفاحة), pisang (موز), jeruk (برتقال), anggur (عنب)', 'Alat transportasi: mobil (سيارة), pesawat (طائرة), kereta (قطار), kapal (سفينة)'] },
+        bahasa_inggris: { title: '🌍 Bahasa Inggris', topics: ['Have/Has untuk kepemilikan (I have, He has)', 'Hewan peliharaan dan kemampuannya (A rabbit can jump)', 'Subject pronoun: I, You, He, She, It, We, They', 'To be: am (I), is (he/she/it), are (you/we/they)', 'Anggota keluarga: father, mother, brother, sister, dll', 'Buah dan sayuran: apple, banana, carrot, spinach', 'Likes untuk menyatakan kesukaan (She likes apples)'] }
+    };
+
+    var data = materiData[subject];
+    document.getElementById('materi-title').textContent = data.title;
+    var list = document.getElementById('materi-list');
+    list.innerHTML = '';
+    data.topics.forEach(function(topic) {
+        var li = document.createElement('li');
+        li.textContent = topic;
+        list.appendChild(li);
+    });
+    document.getElementById('materi-start-btn').onclick = function() { startExam(subject); };
+}
 
 // ==================== STUDENT HISTORY ====================
 
@@ -106,30 +201,18 @@ async function renderStudentHistory() {
 
     var history = [];
     try {
-        if (typeof isFirebaseConfigured === 'function' && isFirebaseConfigured()) {
-            var snapshot = await db.collection('examHistory')
-                .where('studentUid', '==', studentUid)
-                .orderBy('timestamp', 'desc')
-                .get();
+        if (isFirebaseConfigured()) {
+            var snapshot = await db.collection('examHistory').get();
             snapshot.forEach(function(doc) {
-                history.push(doc.data());
-            });
-        }
-    } catch (e) {
-        // Fallback: try without orderBy (needs composite index)
-        try {
-            var snapshot2 = await db.collection('examHistory').get();
-            snapshot2.forEach(function(doc) {
                 var d = doc.data();
                 if (d.studentUid === studentUid) history.push(d);
             });
             history.sort(function(a, b) { return (b.id || 0) - (a.id || 0); });
-        } catch (e2) {
-            console.error('renderStudentHistory error:', e2);
         }
+    } catch (e) {
+        console.error('renderStudentHistory error:', e);
     }
 
-    // Apply subject filter
     if (filter && filter !== 'all') {
         history = history.filter(function(h) { return h.subject === filter; });
     }
@@ -145,9 +228,10 @@ async function renderStudentHistory() {
         div.className = 'history-card-student';
         var subjectNames = { pai:'PAI', ppkn:'Pendidikan Pancasila', matematika:'Matematika', bahasa_indonesia:'Bahasa Indonesia', bahasa_arab:'Bahasa Arab', bahasa_inggris:'Bahasa Inggris' };
         var icons = { pai:'🕌', ppkn:'🏛️', matematika:'🧮', bahasa_indonesia:'📝', bahasa_arab:'🌙', bahasa_inggris:'🌍' };
+        var badge = getBadgeForScore(record.score);
         div.innerHTML = '<div class="hcs-header">' +
             '<span class="hcs-subject">' + (icons[record.subject] || '') + ' ' + (subjectNames[record.subject] || record.subject) + '</span>' +
-            '<span class="hcs-score ' + (record.score >= 60 ? 'good' : 'bad') + '">' + record.score + '/100</span></div>' +
+            '<span class="hcs-score ' + (record.score >= 60 ? 'good' : 'bad') + '">' + (badge ? badge.emoji + ' ' : '') + record.score + '/100</span></div>' +
             '<div class="hcs-stats"><span>✅ ' + record.correct + ' benar</span><span>❌ ' + record.wrong + ' salah</span><span>📅 ' + (record.date || '-') + '</span></div>';
         container.appendChild(div);
     });
@@ -170,26 +254,26 @@ async function generateExamQuestions(subject) {
     try {
         var bank = await getQuestionsFromFirestore(subject);
         if (!bank || bank.length === 0) {
-            alert('Soal untuk mata pelajaran ini belum tersedia di database.\n\nHubungi admin untuk mengupload soal.');
+            alert('Soal untuk mata pelajaran ini belum tersedia di database.');
             return [];
         }
-
-        // Get question count from Firestore settings
-        var questionCount = 20; // default
+        var questionCount = 20;
         try {
             var settingsDoc = await db.collection('settings').doc('exam').get();
             if (settingsDoc.exists && settingsDoc.data().questionsPerExam && settingsDoc.data().questionsPerExam[subject]) {
                 questionCount = settingsDoc.data().questionsPerExam[subject];
             }
+            // Also check showAnswers setting
+            if (settingsDoc.exists && typeof settingsDoc.data().showAnswers !== 'undefined') {
+                showAnswersEnabled = settingsDoc.data().showAnswers;
+            }
         } catch (e) {
-            // Try localStorage fallback
             var localSettings = localStorage.getItem('examSettings');
             if (localSettings) {
                 var parsed = JSON.parse(localSettings);
                 if (parsed[subject]) questionCount = parsed[subject];
             }
         }
-
         var shuffled = shuffleArray(bank);
         return shuffled.slice(0, Math.min(questionCount, bank.length));
     } catch (error) {
@@ -209,14 +293,7 @@ function saveHistory(record) {
 }
 
 function getSubjectName(subject) {
-    var names = {
-        'pai': 'PAI',
-        'ppkn': 'Pendidikan Pancasila',
-        'matematika': 'Matematika',
-        'bahasa_indonesia': 'Bahasa Indonesia',
-        'bahasa_arab': 'Bahasa Arab',
-        'bahasa_inggris': 'Bahasa Inggris'
-    };
+    var names = { pai:'PAI', ppkn:'Pendidikan Pancasila', matematika:'Matematika', bahasa_indonesia:'Bahasa Indonesia', bahasa_arab:'Bahasa Arab', bahasa_inggris:'Bahasa Inggris' };
     return names[subject] || subject;
 }
 
@@ -228,36 +305,22 @@ async function startExam(subject) {
     timeLeft = 1800;
 
     document.getElementById('loading-overlay').classList.add('show');
-
     try {
         currentQuestions = await generateExamQuestions(subject);
     } catch (error) {
         console.error('startExam error:', error);
         currentQuestions = [];
     }
-
     document.getElementById('loading-overlay').classList.remove('show');
 
-    if (!currentQuestions || currentQuestions.length === 0) {
-        return;
-    }
+    if (!currentQuestions || currentQuestions.length === 0) return;
 
     userAnswers = new Array(currentQuestions.length).fill(null);
-
-    document.getElementById('home-page').style.display = 'none';
+    hideAllPages();
     document.getElementById('exam-page').style.display = 'block';
-    document.getElementById('result-page').style.display = 'none';
 
-    var titles = {
-        'pai': '🕌 PAI',
-        'ppkn': '🏛️ Pendidikan Pancasila',
-        'matematika': '🧮 Matematika',
-        'bahasa_indonesia': '📝 Bahasa Indonesia',
-        'bahasa_arab': '🌙 Bahasa Arab',
-        'bahasa_inggris': '🌍 Bahasa Inggris'
-    };
+    var titles = { pai:'🕌 PAI', ppkn:'🏛️ Pancasila', matematika:'🧮 Matematika', bahasa_indonesia:'📝 B. Indonesia', bahasa_arab:'🌙 B. Arab', bahasa_inggris:'🌍 B. Inggris' };
     document.getElementById('exam-title').textContent = titles[subject] || subject;
-
     startTimer();
     showQuestion();
 }
@@ -272,7 +335,6 @@ function showQuestion() {
 
     var optionsContainer = document.getElementById('options-container');
     optionsContainer.innerHTML = '';
-
     var letters = ['A', 'B', 'C', 'D'];
     question.options.forEach(function(option, index) {
         var optionDiv = document.createElement('div');
@@ -292,81 +354,39 @@ function showQuestion() {
     }
 }
 
-function selectOption(index) {
-    userAnswers[currentQuestionIndex] = index;
-    showQuestion();
-}
-
-function nextQuestion() {
-    if (currentQuestionIndex < currentQuestions.length - 1) {
-        currentQuestionIndex++;
-        showQuestion();
-    }
-}
-
-function prevQuestion() {
-    if (currentQuestionIndex > 0) {
-        currentQuestionIndex--;
-        showQuestion();
-    }
-}
+function selectOption(index) { userAnswers[currentQuestionIndex] = index; showQuestion(); }
+function nextQuestion() { if (currentQuestionIndex < currentQuestions.length - 1) { currentQuestionIndex++; showQuestion(); } }
+function prevQuestion() { if (currentQuestionIndex > 0) { currentQuestionIndex--; showQuestion(); } }
 
 function submitExam() {
     var unanswered = userAnswers.filter(function(a) { return a === null; }).length;
-    if (unanswered > 0) {
-        if (!confirm('Masih ada ' + unanswered + ' soal yang belum dijawab. Yakin ingin mengumpulkan?')) return;
-    } else {
-        if (!confirm('Yakin ingin mengumpulkan jawaban?')) return;
-    }
+    if (unanswered > 0) { if (!confirm('Masih ada ' + unanswered + ' soal belum dijawab. Yakin mengumpulkan?')) return; }
+    else { if (!confirm('Yakin ingin mengumpulkan jawaban?')) return; }
     finishExam();
 }
 
 function finishExam() {
     clearInterval(timerInterval);
-
     var correct = 0;
     var details = [];
-
     currentQuestions.forEach(function(question, index) {
         var isCorrect = userAnswers[index] === question.answer;
         if (isCorrect) correct++;
-        details.push({
-            number: index + 1,
-            question: question.question,
-            userAnswer: userAnswers[index] !== null ? question.options[userAnswers[index]] : 'Tidak dijawab',
-            correctAnswer: question.options[question.answer],
-            isCorrect: isCorrect
-        });
+        details.push({ number: index + 1, question: question.question, userAnswer: userAnswers[index] !== null ? question.options[userAnswers[index]] : 'Tidak dijawab', correctAnswer: question.options[question.answer], isCorrect: isCorrect });
     });
-
     var total = currentQuestions.length;
     var score = Math.round((correct / total) * 100);
     var wrong = total - correct;
-
-    var record = {
-        id: Date.now(),
-        studentName: studentName,
-        studentEmail: studentEmail,
-        studentUid: studentUid,
-        subject: currentSubject,
-        subjectName: getSubjectName(currentSubject),
-        date: new Date().toLocaleString('id-ID'),
-        score: score,
-        correct: correct,
-        wrong: wrong,
-        total: total,
-        timeUsed: 1800 - timeLeft,
-        details: details
-    };
+    var record = { id: Date.now(), studentName: studentName, studentEmail: studentEmail, studentUid: studentUid, subject: currentSubject, subjectName: getSubjectName(currentSubject), date: new Date().toLocaleString('id-ID'), score: score, correct: correct, wrong: wrong, total: total, timeUsed: 1800 - timeLeft, details: details };
     saveHistory(record);
     showResult(score, correct, total, details);
 }
 
 function showResult(score, correct, total, details) {
-    document.getElementById('home-page').style.display = 'none';
-    document.getElementById('exam-page').style.display = 'none';
+    hideAllPages();
     document.getElementById('result-page').style.display = 'block';
 
+    var badge = getBadgeForScore(score);
     var icon, title, message;
     if (score >= 80) { icon = '🌟'; title = 'Luar Biasa!'; message = 'Kamu hebat! Pertahankan terus ya!'; }
     else if (score >= 60) { icon = '👍'; title = 'Bagus!'; message = 'Sudah cukup baik, terus belajar ya!'; }
@@ -376,59 +396,56 @@ function showResult(score, correct, total, details) {
     document.getElementById('result-icon').textContent = icon;
     document.getElementById('result-title').textContent = title;
     document.getElementById('score-display').textContent = score + '/100';
+
+    // Show badge if earned
+    var badgeHtml = '';
+    if (badge) {
+        badgeHtml = '<div class="result-badge"><span>' + badge.emoji + '</span> Badge: <strong>' + badge.name + '</strong></div>';
+    }
+    document.getElementById('result-badge-area').innerHTML = badgeHtml;
     document.getElementById('result-message').textContent = message + '\nBenar: ' + correct + ' dari ' + total + ' soal';
 
+    // Show/hide answer details based on admin setting
     var detailsContainer = document.getElementById('result-details');
-    detailsContainer.innerHTML = '<h3>Detail Jawaban:</h3>';
-    details.forEach(function(item) {
-        var div = document.createElement('div');
-        div.className = 'result-item ' + (item.isCorrect ? 'correct' : 'wrong');
-        div.innerHTML = '<span>' + (item.isCorrect ? '✅' : '❌') + '</span><div><strong>Soal ' + item.number + ':</strong> ' + item.question + '<br><small>Jawabanmu: ' + item.userAnswer + '</small><br>' + (!item.isCorrect ? '<small>Jawaban benar: ' + item.correctAnswer + '</small>' : '') + '</div>';
-        detailsContainer.appendChild(div);
-    });
-}
-
-function cancelExam() {
-    if (confirm('Yakin ingin keluar dari ujian?\n\nProgress tidak disimpan dan harus mengulang dari awal.')) {
-        clearInterval(timerInterval);
-        currentQuestions = [];
-        currentQuestionIndex = 0;
-        userAnswers = [];
-        timeLeft = 1800;
-        document.getElementById('home-page').style.display = 'block';
-        document.getElementById('exam-page').style.display = 'none';
-        document.getElementById('result-page').style.display = 'none';
+    if (showAnswersEnabled) {
+        detailsContainer.style.display = 'block';
+        detailsContainer.innerHTML = '<h3>Detail Jawaban:</h3>';
+        details.forEach(function(item) {
+            var div = document.createElement('div');
+            div.className = 'result-item ' + (item.isCorrect ? 'correct' : 'wrong');
+            div.innerHTML = '<span>' + (item.isCorrect ? '✅' : '❌') + '</span><div><strong>Soal ' + item.number + ':</strong> ' + item.question + '<br><small>Jawabanmu: ' + item.userAnswer + '</small><br>' + (!item.isCorrect ? '<small>Jawaban benar: ' + item.correctAnswer + '</small>' : '') + '</div>';
+            detailsContainer.appendChild(div);
+        });
+    } else {
+        detailsContainer.style.display = 'none';
+        detailsContainer.innerHTML = '<p class="answers-locked">🔒 Kunci jawaban dikunci oleh admin.</p>';
+        detailsContainer.style.display = 'block';
     }
 }
 
-function goHome() {
-    hideAllPages();
-    document.getElementById('home-page').style.display = 'block';
-    clearInterval(timerInterval);
+function cancelExam() {
+    if (confirm('Yakin ingin keluar?\n\nProgress tidak disimpan.')) {
+        clearInterval(timerInterval);
+        currentQuestions = []; currentQuestionIndex = 0; userAnswers = []; timeLeft = 1800;
+        hideAllPages();
+        document.getElementById('home-page').style.display = 'block';
+    }
 }
 
-// ==================== TIMER ====================
+function goHome() { hideAllPages(); document.getElementById('home-page').style.display = 'block'; clearInterval(timerInterval); }
 
+// ==================== TIMER ====================
 function startTimer() {
     updateTimerDisplay();
     timerInterval = setInterval(function() {
         timeLeft--;
         updateTimerDisplay();
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            alert('Waktu habis! Jawaban dikumpulkan otomatis.');
-            finishExam();
-        }
+        if (timeLeft <= 0) { clearInterval(timerInterval); alert('Waktu habis!'); finishExam(); }
     }, 1000);
 }
 
 function updateTimerDisplay() {
-    var minutes = Math.floor(timeLeft / 60);
-    var seconds = timeLeft % 60;
-    document.getElementById('timer-display').textContent =
-        (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
-    var timerEl = document.getElementById('timer');
-    if (timeLeft <= 60) {
-        timerEl.classList.add('warning');
-    }
+    var m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+    document.getElementById('timer-display').textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    if (timeLeft <= 60) document.getElementById('timer').classList.add('warning');
 }

@@ -108,38 +108,45 @@
                 </div>
             </div>
 
+            <!-- Badges -->
+            <div class="badge-section">
+                <h3 class="badge-title">🏅 Badge Kamu</h3>
+                <div class="badge-container" id="badge-container"></div>
+            </div>
+
+            <h3 class="section-label">Pilih Mata Pelajaran:</h3>
             <div class="subject-grid">
-                <div class="subject-card" onclick="startExam('pai')">
+                <div class="subject-card" onclick="showMateri('pai')">
                     <div class="subject-icon">🕌</div>
                     <h3>PAI</h3>
                     <p>Pendidikan Agama Islam</p>
                     <span class="badge">20 Soal • 30 Menit</span>
                 </div>
-                <div class="subject-card" onclick="startExam('ppkn')">
+                <div class="subject-card" onclick="showMateri('ppkn')">
                     <div class="subject-icon">🏛️</div>
                     <h3>Pendidikan Pancasila</h3>
                     <p>Mengenal Indonesia & Lingkungan</p>
                     <span class="badge">20 Soal • 30 Menit</span>
                 </div>
-                <div class="subject-card" onclick="startExam('matematika')">
+                <div class="subject-card" onclick="showMateri('matematika')">
                     <div class="subject-icon">🧮</div>
                     <h3>Matematika</h3>
                     <p>Bilangan, Penjumlahan & Pengurangan</p>
                     <span class="badge">20 Soal • 30 Menit</span>
                 </div>
-                <div class="subject-card" onclick="startExam('bahasa_indonesia')">
+                <div class="subject-card" onclick="showMateri('bahasa_indonesia')">
                     <div class="subject-icon">📝</div>
                     <h3>Bahasa Indonesia</h3>
                     <p>Membaca, Menulis & Kalimat</p>
                     <span class="badge">20 Soal • 30 Menit</span>
                 </div>
-                <div class="subject-card" onclick="startExam('bahasa_arab')">
+                <div class="subject-card" onclick="showMateri('bahasa_arab')">
                     <div class="subject-icon">🌙</div>
                     <h3>Bahasa Arab</h3>
                     <p>Kosakata & Percakapan</p>
                     <span class="badge">20 Soal • 30 Menit</span>
                 </div>
-                <div class="subject-card" onclick="startExam('bahasa_inggris')">
+                <div class="subject-card" onclick="showMateri('bahasa_inggris')">
                     <div class="subject-icon">🌍</div>
                     <h3>Bahasa Inggris</h3>
                     <p>Vocabulary & Simple Sentences</p>
@@ -149,6 +156,22 @@
 
             <div class="admin-link">
                 <a href="admin.html">Masuk sebagai Admin →</a>
+            </div>
+        </div>
+
+        <!-- Halaman Materi -->
+        <div id="materi-page" style="display: none;">
+            <header>
+                <h1 id="materi-title"></h1>
+                <p class="subtitle">Rangkuman Materi</p>
+            </header>
+            <div class="materi-box">
+                <h3>📖 Pelajari materi ini sebelum ujian:</h3>
+                <ul id="materi-list" class="materi-list"></ul>
+            </div>
+            <div class="materi-actions">
+                <button class="btn btn-success" id="materi-start-btn">Mulai Ujian →</button>
+                <button class="btn btn-secondary" onclick="goHome()">← Kembali</button>
             </div>
         </div>
 
@@ -205,6 +228,7 @@
                 <div class="result-icon" id="result-icon"></div>
                 <h2 id="result-title"></h2>
                 <div class="score-display" id="score-display"></div>
+                <div id="result-badge-area"></div>
                 <p class="result-message" id="result-message"></p>
                 <div class="result-details" id="result-details"></div>
                 <button class="btn btn-primary" onclick="goHome()">← Kembali ke Menu</button>

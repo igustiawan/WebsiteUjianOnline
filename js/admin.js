@@ -558,12 +558,14 @@ async function loadExamSettings() {
     var grid = document.getElementById('settings-grid');
     grid.innerHTML = '<div class="empty-state">Memuat pengaturan...</div>';
 
-    // Try to load from Firestore
     if (typeof isFirebaseConfigured === 'function' && isFirebaseConfigured()) {
         try {
             var doc = await db.collection('settings').doc('exam').get();
             if (doc.exists && doc.data().questionsPerExam) {
                 examSettings = doc.data().questionsPerExam;
+            }
+            if (doc.exists && typeof doc.data().showAnswers !== 'undefined') {
+                document.getElementById('setting-show-answers').value = doc.data().showAnswers.toString();
             }
         } catch (e) {
             console.error('loadExamSettings error:', e);
@@ -594,6 +596,7 @@ async function saveExamSettings() {
     });
 
     examSettings = newSettings;
+    var showAnswers = document.getElementById('setting-show-answers').value === 'true';
 
     var statusEl = document.getElementById('settings-status');
     statusEl.style.display = 'block';
@@ -604,6 +607,7 @@ async function saveExamSettings() {
         if (typeof isFirebaseConfigured === 'function' && isFirebaseConfigured()) {
             await db.collection('settings').doc('exam').set({
                 questionsPerExam: newSettings,
+                showAnswers: showAnswers,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
         }

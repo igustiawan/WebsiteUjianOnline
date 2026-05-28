@@ -150,9 +150,18 @@
                 <h2 class="section-title">⚙️ Pengaturan Ujian</h2>
                 <div class="settings-box">
                     <h3>Jumlah Soal Per Ujian</h3>
-                    <p>Atur berapa soal yang tampil saat siswa mengerjakan ujian (soal diacak dari bank soal).</p>
+                    <p>Atur berapa soal yang tampil saat siswa mengerjakan ujian.</p>
                     <div class="settings-grid" id="settings-grid"></div>
-                    <button class="btn btn-success" onclick="saveExamSettings()">💾 Simpan Pengaturan</button>
+                    <h3 style="margin-top:20px;">Kunci Jawaban</h3>
+                    <p>Kontrol apakah siswa bisa melihat jawaban benar setelah ujian.</p>
+                    <div class="settings-row">
+                        <label>🔐 Tampilkan kunci jawaban ke siswa</label>
+                        <select id="setting-show-answers">
+                            <option value="true">Ya - Tampilkan</option>
+                            <option value="false">Tidak - Sembunyikan</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-success" onclick="saveExamSettings()" style="margin-top:16px;">💾 Simpan Pengaturan</button>
                     <div id="settings-status" class="ai-status" style="display:none;"></div>
                 </div>
             </div>
