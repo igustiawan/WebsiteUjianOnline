@@ -184,13 +184,19 @@ async function seedQuestionsToFirestore() {
 async function getQuestionsFromFirestore(subject) {
     if (!isFirebaseConfigured()) return null;
     try {
-        const doc = await db.collection('questionBank').doc(subject).get();
+        // Timeout 10 detik - kalau Firebase lama, return null
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Timeout')), 10000)
+        );
+        const fetchPromise = db.collection('questionBank').doc(subject).get();
+        
+        const doc = await Promise.race([fetchPromise, timeoutPromise]);
         if (doc.exists && doc.data().questions) {
             return doc.data().questions;
         }
         return null;
     } catch (error) {
-        console.error('❌ Gagal ambil soal dari Firestore:', error);
+        console.error('Gagal ambil soal dari Firestore:', error);
         return null;
     }
 }

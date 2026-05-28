@@ -18,14 +18,19 @@ function shuffleArray(array) {
 }
 
 async function generateExamQuestions(subject) {
-    // Ambil soal dari Firebase Firestore
-    const bank = await getQuestionsFromFirestore(subject);
-    if (!bank || bank.length === 0) {
-        alert('⚠️ Soal belum tersedia untuk mata pelajaran ini. Hubungi admin untuk mengupload soal ke database.');
+    try {
+        const bank = await getQuestionsFromFirestore(subject);
+        if (!bank || bank.length === 0) {
+            alert('Soal belum tersedia untuk mata pelajaran ini. Hubungi admin untuk mengupload soal ke database.');
+            return [];
+        }
+        const shuffled = shuffleArray(bank);
+        return shuffled.slice(0, 15);
+    } catch (error) {
+        console.error('Error fetching questions:', error);
+        alert('Gagal mengambil soal. Periksa koneksi internet dan coba lagi.');
         return [];
     }
-    const shuffled = shuffleArray(bank);
-    return shuffled.slice(0, 15);
 }
 
 function saveHistory(record) {
@@ -60,19 +65,23 @@ function getSubjectName(subject) {
 async function startExam(subject) {
     currentSubject = subject;
     currentQuestionIndex = 0;
-    timeLeft = 1800; // 30 menit
+    timeLeft = 1800;
 
     // Show loading
     document.getElementById('loading-overlay').classList.add('show');
 
-    // Generate soal acak dari Firebase
-    currentQuestions = await generateExamQuestions(subject);
+    try {
+        currentQuestions = await generateExamQuestions(subject);
+    } catch (error) {
+        console.error('startExam error:', error);
+        currentQuestions = [];
+    }
 
-    // Hide loading
+    // Always hide loading
     document.getElementById('loading-overlay').classList.remove('show');
 
-    if (currentQuestions.length === 0) {
-        return; // alert already shown in generateExamQuestions
+    if (!currentQuestions || currentQuestions.length === 0) {
+        return;
     }
 
     // Reset jawaban
