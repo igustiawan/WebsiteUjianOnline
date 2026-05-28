@@ -1,6 +1,6 @@
 // ==================== ADMIN CONFIG ====================
 // Admin uses Google Sign-In - only these emails have access
-const ADMIN_EMAILS = ['igustiawan@gmail.com']; // Ganti/tambah email admin di sini
+const ADMIN_EMAILS = ['igustiawan46@gmail.com']; // Email admin yang punya akses
 
 let currentEditIndex = null;
 let currentSubjectTab = 'pai';
