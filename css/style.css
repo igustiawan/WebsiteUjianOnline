@@ -613,3 +613,82 @@ header .subtitle {
     .score-display { font-size: 2.4em; }
     .name-characters { width: 240px; }
 }
+
+
+
+/* ==================== GOOGLE BUTTON ==================== */
+.btn-google {
+    width: 100%;
+    padding: 14px 20px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    font-size: 1.05em;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #334155;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.btn-google:hover {
+    border-color: #4285F4;
+    box-shadow: 0 4px 16px rgba(66,133,244,0.15);
+    transform: translateY(-1px);
+}
+
+.btn-google:active {
+    transform: translateY(0);
+}
+
+/* ==================== USER INFO ==================== */
+.welcome-box .user-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-align: left;
+}
+
+.user-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid #e0e7ff;
+}
+
+.welcome-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.btn-logout {
+    background: #f1f5f9;
+    color: #64748b;
+    border: 2px solid #e2e8f0;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 0.82em;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-logout:hover {
+    color: #dc2626;
+    border-color: #fecaca;
+    background: #fef2f2;
+}
+
+@media (max-width: 640px) {
+    .welcome-box { flex-direction: column; text-align: center; }
+    .welcome-box .user-info { flex-direction: column; text-align: center; }
+}

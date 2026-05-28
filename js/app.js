@@ -1,32 +1,79 @@
 // ==================== VARIABEL GLOBAL ====================
-let currentSubject = '';
-let currentQuestions = [];
-let currentQuestionIndex = 0;
-let userAnswers = [];
-let timerInterval = null;
-let timeLeft = 1800;
-let studentName = '';
+var currentSubject = '';
+var currentQuestions = [];
+var currentQuestionIndex = 0;
+var userAnswers = [];
+var timerInterval = null;
+var timeLeft = 1800;
+var studentName = '';
+var studentEmail = '';
+var studentUid = '';
+var studentPhoto = '';
 
-// ==================== NAME INPUT ====================
+// ==================== GOOGLE SIGN IN ====================
 
-function submitName(e) {
-    e.preventDefault();
-    const nameInput = document.getElementById('student-name').value.trim();
-    if (!nameInput) return;
+function signInWithGoogle() {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithPopup(provider).then(function(result) {
+        var user = result.user;
+        studentName = user.displayName || 'Siswa';
+        studentEmail = user.email || '';
+        studentUid = user.uid || '';
+        studentPhoto = user.photoURL || '';
+        showHomePage();
+    }).catch(function(error) {
+        console.error('Login error:', error);
+        if (error.code === 'auth/popup-closed-by-user') {
+            // User closed popup, do nothing
+        } else {
+            alert('Gagal login: ' + error.message);
+        }
+    });
+}
 
-    studentName = nameInput;
+function signOut() {
+    firebase.auth().signOut().then(function() {
+        studentName = '';
+        studentEmail = '';
+        studentUid = '';
+        studentPhoto = '';
+        document.getElementById('name-page').style.display = 'flex';
+        document.getElementById('home-page').style.display = 'none';
+        document.getElementById('exam-page').style.display = 'none';
+        document.getElementById('result-page').style.display = 'none';
+    });
+}
+
+function showHomePage() {
     document.getElementById('display-name').textContent = studentName;
+    if (studentPhoto) {
+        document.getElementById('user-avatar').src = studentPhoto;
+        document.getElementById('user-avatar').style.display = 'inline-block';
+    }
     document.getElementById('name-page').style.display = 'none';
     document.getElementById('home-page').style.display = 'block';
 }
 
+// Check if user already logged in
+firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+        studentName = user.displayName || 'Siswa';
+        studentEmail = user.email || '';
+        studentUid = user.uid || '';
+        studentPhoto = user.photoURL || '';
+        showHomePage();
+    }
+});
+
 // ==================== DATA MANAGEMENT ====================
 
 function shuffleArray(array) {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    var shuffled = array.slice();
+    for (var i = shuffled.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = shuffled[i];
+        shuffled[i] = shuffled[j];
+        shuffled[j] = temp;
     }
     return shuffled;
 }
@@ -35,7 +82,7 @@ async function generateExamQuestions(subject) {
     try {
         var bank = await getQuestionsFromFirestore(subject);
         if (!bank || bank.length === 0) {
-            alert('Soal untuk mata pelajaran ini belum tersedia di database.\n\nPastikan:\n1. Firebase Firestore sudah aktif\n2. Soal sudah di-upload via halaman seed\n3. Rules Firestore allow read: true\n\nBuka Console (F12) untuk detail error.');
+            alert('Soal untuk mata pelajaran ini belum tersedia di database.\n\nHubungi admin untuk mengupload soal.');
             return [];
         }
         var shuffled = shuffleArray(bank);
@@ -48,22 +95,16 @@ async function generateExamQuestions(subject) {
 }
 
 function saveHistory(record) {
-    // Simpan ke Firebase jika configured
     if (typeof isFirebaseConfigured === 'function' && isFirebaseConfigured()) {
         saveExamToFirestore(record);
     }
-    // Selalu simpan juga ke localStorage sebagai backup
-    const history = JSON.parse(localStorage.getItem('examHistory') || '[]');
+    var history = JSON.parse(localStorage.getItem('examHistory') || '[]');
     history.unshift(record);
     localStorage.setItem('examHistory', JSON.stringify(history));
 }
 
-function getHistory() {
-    return JSON.parse(localStorage.getItem('examHistory') || '[]');
-}
-
 function getSubjectName(subject) {
-    const names = {
+    var names = {
         'pai': 'PAI',
         'ppkn': 'Pendidikan Pancasila',
         'matematika': 'Matematika',
@@ -81,7 +122,6 @@ async function startExam(subject) {
     currentQuestionIndex = 0;
     timeLeft = 1800;
 
-    // Show loading
     document.getElementById('loading-overlay').classList.add('show');
 
     try {
@@ -91,72 +131,58 @@ async function startExam(subject) {
         currentQuestions = [];
     }
 
-    // Always hide loading
     document.getElementById('loading-overlay').classList.remove('show');
 
     if (!currentQuestions || currentQuestions.length === 0) {
         return;
     }
 
-    // Reset jawaban
     userAnswers = new Array(currentQuestions.length).fill(null);
 
-    // Tampilkan halaman ujian
     document.getElementById('home-page').style.display = 'none';
     document.getElementById('exam-page').style.display = 'block';
     document.getElementById('result-page').style.display = 'none';
 
-    // Set judul
-    const titles = {
-        'pai': '🕌 PAI - Pendidikan Agama Islam',
-        'ppkn': '🇮🇩 Pendidikan Pancasila',
-        'matematika': '🔢 Matematika',
-        'bahasa_indonesia': '📖 Bahasa Indonesia',
+    var titles = {
+        'pai': '🕌 PAI',
+        'ppkn': '🏛️ Pendidikan Pancasila',
+        'matematika': '🧮 Matematika',
+        'bahasa_indonesia': '📝 Bahasa Indonesia',
         'bahasa_arab': '🌙 Bahasa Arab',
         'bahasa_inggris': '🌍 Bahasa Inggris'
     };
-    document.getElementById('exam-title').textContent = titles[subject];
+    document.getElementById('exam-title').textContent = titles[subject] || subject;
 
-    // Mulai timer
     startTimer();
-
-    // Tampilkan soal pertama
     showQuestion();
 }
 
 function showQuestion() {
-    const question = currentQuestions[currentQuestionIndex];
-    const total = currentQuestions.length;
+    var question = currentQuestions[currentQuestionIndex];
+    var total = currentQuestions.length;
 
-    // Update progress
-    document.getElementById('exam-progress').textContent = `Soal ${currentQuestionIndex + 1} dari ${total}`;
-    document.getElementById('question-number').textContent = `Soal ${currentQuestionIndex + 1}`;
+    document.getElementById('exam-progress').textContent = 'Soal ' + (currentQuestionIndex + 1) + ' dari ' + total;
+    document.getElementById('question-number').textContent = 'Soal ' + (currentQuestionIndex + 1);
     document.getElementById('question-text').textContent = question.question;
 
-    // Render pilihan jawaban
-    const optionsContainer = document.getElementById('options-container');
+    var optionsContainer = document.getElementById('options-container');
     optionsContainer.innerHTML = '';
 
-    const letters = ['A', 'B', 'C', 'D'];
-    question.options.forEach((option, index) => {
-        const optionDiv = document.createElement('div');
+    var letters = ['A', 'B', 'C', 'D'];
+    question.options.forEach(function(option, index) {
+        var optionDiv = document.createElement('div');
         optionDiv.className = 'option' + (userAnswers[currentQuestionIndex] === index ? ' selected' : '');
-        optionDiv.innerHTML = `
-            <span class="option-letter">${letters[index]}</span>
-            <span>${option}</span>
-        `;
-        optionDiv.onclick = () => selectOption(index);
+        optionDiv.innerHTML = '<span class="option-letter">' + letters[index] + '</span><span>' + option + '</span>';
+        optionDiv.onclick = function() { selectOption(index); };
         optionsContainer.appendChild(optionDiv);
     });
 
-    // Update tombol navigasi
-    document.getElementById('btn-prev').style.display = currentQuestionIndex === 0 ? 'none' : 'inline-block';
-    
+    document.getElementById('btn-prev').style.display = currentQuestionIndex === 0 ? 'none' : 'inline-flex';
     if (currentQuestionIndex === total - 1) {
         document.getElementById('btn-next').style.display = 'none';
-        document.getElementById('btn-submit').style.display = 'inline-block';
+        document.getElementById('btn-submit').style.display = 'inline-flex';
     } else {
-        document.getElementById('btn-next').style.display = 'inline-block';
+        document.getElementById('btn-next').style.display = 'inline-flex';
         document.getElementById('btn-submit').style.display = 'none';
     }
 }
@@ -181,30 +207,24 @@ function prevQuestion() {
 }
 
 function submitExam() {
-    const unanswered = userAnswers.filter(a => a === null).length;
+    var unanswered = userAnswers.filter(function(a) { return a === null; }).length;
     if (unanswered > 0) {
-        if (!confirm(`Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengumpulkan?`)) {
-            return;
-        }
+        if (!confirm('Masih ada ' + unanswered + ' soal yang belum dijawab. Yakin ingin mengumpulkan?')) return;
     } else {
-        if (!confirm('Yakin ingin mengumpulkan jawaban?')) {
-            return;
-        }
+        if (!confirm('Yakin ingin mengumpulkan jawaban?')) return;
     }
-
     finishExam();
 }
 
 function finishExam() {
     clearInterval(timerInterval);
 
-    let correct = 0;
-    const details = [];
+    var correct = 0;
+    var details = [];
 
-    currentQuestions.forEach((question, index) => {
-        const isCorrect = userAnswers[index] === question.answer;
+    currentQuestions.forEach(function(question, index) {
+        var isCorrect = userAnswers[index] === question.answer;
         if (isCorrect) correct++;
-        
         details.push({
             number: index + 1,
             question: question.question,
@@ -214,14 +234,15 @@ function finishExam() {
         });
     });
 
-    const total = currentQuestions.length;
-    const score = Math.round((correct / total) * 100);
-    const wrong = total - correct;
+    var total = currentQuestions.length;
+    var score = Math.round((correct / total) * 100);
+    var wrong = total - correct;
 
-    // Simpan ke history
-    const record = {
+    var record = {
         id: Date.now(),
         studentName: studentName,
+        studentEmail: studentEmail,
+        studentUid: studentUid,
         subject: currentSubject,
         subjectName: getSubjectName(currentSubject),
         date: new Date().toLocaleString('id-ID'),
@@ -233,8 +254,6 @@ function finishExam() {
         details: details
     };
     saveHistory(record);
-
-    // Tampilkan hasil
     showResult(score, correct, total, details);
 }
 
@@ -243,50 +262,29 @@ function showResult(score, correct, total, details) {
     document.getElementById('exam-page').style.display = 'none';
     document.getElementById('result-page').style.display = 'block';
 
-    let icon, title, message;
-    if (score >= 80) {
-        icon = '🌟';
-        title = 'Luar Biasa!';
-        message = 'Kamu hebat! Pertahankan terus ya! 🎉';
-    } else if (score >= 60) {
-        icon = '👍';
-        title = 'Bagus!';
-        message = 'Sudah cukup baik, terus belajar ya! 💪';
-    } else if (score >= 40) {
-        icon = '📚';
-        title = 'Cukup';
-        message = 'Ayo belajar lagi supaya lebih baik! 📖';
-    } else {
-        icon = '💪';
-        title = 'Semangat!';
-        message = 'Jangan menyerah, terus belajar ya! 🌈';
-    }
+    var icon, title, message;
+    if (score >= 80) { icon = '🌟'; title = 'Luar Biasa!'; message = 'Kamu hebat! Pertahankan terus ya!'; }
+    else if (score >= 60) { icon = '👍'; title = 'Bagus!'; message = 'Sudah cukup baik, terus belajar ya!'; }
+    else if (score >= 40) { icon = '📚'; title = 'Cukup'; message = 'Ayo belajar lagi supaya lebih baik!'; }
+    else { icon = '💪'; title = 'Semangat!'; message = 'Jangan menyerah, terus belajar ya!'; }
 
     document.getElementById('result-icon').textContent = icon;
     document.getElementById('result-title').textContent = title;
-    document.getElementById('score-display').textContent = `${score}/100`;
-    document.getElementById('result-message').textContent = `${message}\nBenar: ${correct} dari ${total} soal`;
+    document.getElementById('score-display').textContent = score + '/100';
+    document.getElementById('result-message').textContent = message + '\nBenar: ' + correct + ' dari ' + total + ' soal';
 
-    const detailsContainer = document.getElementById('result-details');
-    detailsContainer.innerHTML = '<h3>📋 Detail Jawaban:</h3>';
-    
-    details.forEach(item => {
-        const div = document.createElement('div');
-        div.className = `result-item ${item.isCorrect ? 'correct' : 'wrong'}`;
-        div.innerHTML = `
-            <span>${item.isCorrect ? '✅' : '❌'}</span>
-            <div>
-                <strong>Soal ${item.number}:</strong> ${item.question}<br>
-                <small>Jawabanmu: ${item.userAnswer}</small><br>
-                ${!item.isCorrect ? `<small>Jawaban benar: ${item.correctAnswer}</small>` : ''}
-            </div>
-        `;
+    var detailsContainer = document.getElementById('result-details');
+    detailsContainer.innerHTML = '<h3>Detail Jawaban:</h3>';
+    details.forEach(function(item) {
+        var div = document.createElement('div');
+        div.className = 'result-item ' + (item.isCorrect ? 'correct' : 'wrong');
+        div.innerHTML = '<span>' + (item.isCorrect ? '✅' : '❌') + '</span><div><strong>Soal ' + item.number + ':</strong> ' + item.question + '<br><small>Jawabanmu: ' + item.userAnswer + '</small><br>' + (!item.isCorrect ? '<small>Jawaban benar: ' + item.correctAnswer + '</small>' : '') + '</div>';
         detailsContainer.appendChild(div);
     });
 }
 
 function cancelExam() {
-    if (confirm('Yakin ingin keluar dari ujian?\n\nProgress kamu tidak akan disimpan dan harus mengulang dari awal.')) {
+    if (confirm('Yakin ingin keluar dari ujian?\n\nProgress tidak disimpan dan harus mengulang dari awal.')) {
         clearInterval(timerInterval);
         currentQuestions = [];
         currentQuestionIndex = 0;
@@ -310,25 +308,23 @@ function goHome() {
 
 function startTimer() {
     updateTimerDisplay();
-    timerInterval = setInterval(() => {
+    timerInterval = setInterval(function() {
         timeLeft--;
         updateTimerDisplay();
-        
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            alert('⏰ Waktu habis! Jawaban akan dikumpulkan otomatis.');
+            alert('Waktu habis! Jawaban dikumpulkan otomatis.');
             finishExam();
         }
     }, 1000);
 }
 
 function updateTimerDisplay() {
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    document.getElementById('timer-display').textContent = 
-        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    
-    const timerEl = document.getElementById('timer');
+    var minutes = Math.floor(timeLeft / 60);
+    var seconds = timeLeft % 60;
+    document.getElementById('timer-display').textContent =
+        (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+    var timerEl = document.getElementById('timer');
     if (timeLeft <= 60) {
         timerEl.classList.add('warning');
     }
