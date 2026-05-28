@@ -33,16 +33,16 @@ function shuffleArray(array) {
 
 async function generateExamQuestions(subject) {
     try {
-        const bank = await getQuestionsFromFirestore(subject);
+        var bank = await getQuestionsFromFirestore(subject);
         if (!bank || bank.length === 0) {
-            alert('Soal belum tersedia untuk mata pelajaran ini. Hubungi admin untuk mengupload soal ke database.');
+            alert('Soal untuk mata pelajaran ini belum tersedia di database.\n\nPastikan:\n1. Firebase Firestore sudah aktif\n2. Soal sudah di-upload via halaman seed\n3. Rules Firestore allow read: true\n\nBuka Console (F12) untuk detail error.');
             return [];
         }
-        const shuffled = shuffleArray(bank);
+        var shuffled = shuffleArray(bank);
         return shuffled.slice(0, 15);
     } catch (error) {
-        console.error('Error fetching questions:', error);
-        alert('Gagal mengambil soal. Periksa koneksi internet dan coba lagi.');
+        console.error('generateExamQuestions error:', error);
+        alert('Gagal mengambil soal: ' + error.message);
         return [];
     }
 }

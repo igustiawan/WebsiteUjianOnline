@@ -182,21 +182,25 @@ async function seedQuestionsToFirestore() {
 
 // Ambil bank soal dari Firestore
 async function getQuestionsFromFirestore(subject) {
-    if (!isFirebaseConfigured()) return null;
+    if (!isFirebaseConfigured()) {
+        console.warn('Firebase belum dikonfigurasi');
+        return null;
+    }
     try {
-        // Timeout 10 detik - kalau Firebase lama, return null
-        const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Timeout')), 10000)
-        );
-        const fetchPromise = db.collection('questionBank').doc(subject).get();
+        var timeoutPromise = new Promise(function(_, reject) {
+            setTimeout(function() { reject(new Error('Timeout 15s')); }, 15000);
+        });
+        var fetchPromise = db.collection('questionBank').doc(subject).get();
+        var doc = await Promise.race([fetchPromise, timeoutPromise]);
         
-        const doc = await Promise.race([fetchPromise, timeoutPromise]);
-        if (doc.exists && doc.data().questions) {
+        if (doc.exists && doc.data().questions && doc.data().questions.length > 0) {
+            console.log('Soal ' + subject + ': ' + doc.data().questions.length + ' soal dari Firestore');
             return doc.data().questions;
         }
+        console.warn('Soal ' + subject + ': dokumen kosong atau tidak ada');
         return null;
     } catch (error) {
-        console.error('Gagal ambil soal dari Firestore:', error);
+        console.error('Gagal ambil soal ' + subject + ':', error.message);
         return null;
     }
 }
