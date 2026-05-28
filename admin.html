@@ -46,6 +46,7 @@
                     <button class="btn btn-secondary btn-sm" onclick="showPage('dashboard')">📊 Dashboard</button>
                     <button class="btn btn-secondary btn-sm" onclick="showPage('questions')">📝 Kelola Soal</button>
                     <button class="btn btn-secondary btn-sm" onclick="showPage('history')">📜 History</button>
+                    <button class="btn btn-secondary btn-sm" onclick="showPage('settings')">⚙️ Pengaturan</button>
                     <button class="btn btn-danger btn-sm" onclick="handleLogout()">🚪 Logout</button>
                 </div>
             </div>
@@ -139,6 +140,18 @@
                 </div>
             </div>
 
+            <!-- Settings Section -->
+            <div id="settings-section" style="display: none;">
+                <h2 class="section-title">⚙️ Pengaturan Ujian</h2>
+                <div class="settings-box">
+                    <h3>Jumlah Soal Per Ujian</h3>
+                    <p>Atur berapa soal yang tampil saat siswa mengerjakan ujian (soal diacak dari bank soal).</p>
+                    <div class="settings-grid" id="settings-grid"></div>
+                    <button class="btn btn-success" onclick="saveExamSettings()">💾 Simpan Pengaturan</button>
+                    <div id="settings-status" class="ai-status" style="display:none;"></div>
+                </div>
+            </div>
+
             <!-- History Section -->
             <div id="history-section" style="display: none;">
                 <h2 class="section-title">📜 Riwayat Ujian</h2>
@@ -151,6 +164,9 @@
                         <option value="bahasa_indonesia">Bahasa Indonesia</option>
                         <option value="bahasa_arab">Bahasa Arab</option>
                         <option value="bahasa_inggris">Bahasa Inggris</option>
+                    </select>
+                    <select id="history-user-filter" onchange="renderHistory()">
+                        <option value="all">Semua Siswa</option>
                     </select>
                     <button class="btn btn-danger btn-sm" onclick="clearHistory()">🗑️ Hapus Semua History</button>
                 </div>

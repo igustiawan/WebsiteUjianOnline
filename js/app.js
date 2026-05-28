@@ -85,8 +85,25 @@ async function generateExamQuestions(subject) {
             alert('Soal untuk mata pelajaran ini belum tersedia di database.\n\nHubungi admin untuk mengupload soal.');
             return [];
         }
+
+        // Get question count from Firestore settings
+        var questionCount = 20; // default
+        try {
+            var settingsDoc = await db.collection('settings').doc('exam').get();
+            if (settingsDoc.exists && settingsDoc.data().questionsPerExam && settingsDoc.data().questionsPerExam[subject]) {
+                questionCount = settingsDoc.data().questionsPerExam[subject];
+            }
+        } catch (e) {
+            // Try localStorage fallback
+            var localSettings = localStorage.getItem('examSettings');
+            if (localSettings) {
+                var parsed = JSON.parse(localSettings);
+                if (parsed[subject]) questionCount = parsed[subject];
+            }
+        }
+
         var shuffled = shuffleArray(bank);
-        return shuffled.slice(0, 15);
+        return shuffled.slice(0, Math.min(questionCount, bank.length));
     } catch (error) {
         console.error('generateExamQuestions error:', error);
         alert('Gagal mengambil soal: ' + error.message);

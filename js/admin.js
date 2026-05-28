@@ -47,6 +47,7 @@ function showPage(page) {
     document.getElementById('dashboard-section').style.display = page === 'dashboard' ? 'block' : 'none';
     document.getElementById('questions-section').style.display = page === 'questions' ? 'block' : 'none';
     document.getElementById('history-section').style.display = page === 'history' ? 'block' : 'none';
+    document.getElementById('settings-section').style.display = page === 'settings' ? 'block' : 'none';
 
     if (page === 'dashboard') {
         renderDashboard();
@@ -54,7 +55,10 @@ function showPage(page) {
         renderSubjectTabs();
         renderQuestions();
     } else if (page === 'history') {
+        loadUserFilter();
         renderHistory();
+    } else if (page === 'settings') {
+        loadExamSettings();
     }
 }
 
@@ -280,8 +284,39 @@ function closeModal() {
 
 // ==================== HISTORY ====================
 
+async function loadUserFilter() {
+    var userSelect = document.getElementById('history-user-filter');
+    var currentVal = userSelect.value;
+    userSelect.innerHTML = '<option value="all">Semua Siswa</option>';
+
+    try {
+        var history;
+        if (typeof isFirebaseConfigured === 'function' && isFirebaseConfigured()) {
+            history = await getExamHistoryFromFirestore();
+        } else {
+            history = getHistory();
+        }
+        var users = {};
+        history.forEach(function(h) {
+            if (h.studentName && !users[h.studentName]) {
+                users[h.studentName] = h.studentEmail || '';
+            }
+        });
+        Object.keys(users).forEach(function(name) {
+            var opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name + (users[name] ? ' (' + users[name] + ')' : '');
+            userSelect.appendChild(opt);
+        });
+        if (currentVal) userSelect.value = currentVal;
+    } catch (e) {
+        console.error('loadUserFilter error:', e);
+    }
+}
+
 async function renderHistory() {
     var filter = document.getElementById('history-filter').value;
+    var userFilter = document.getElementById('history-user-filter').value;
     var container = document.getElementById('history-list');
     container.innerHTML = '<div class="empty-state">Memuat riwayat...</div>';
 
@@ -296,6 +331,11 @@ async function renderHistory() {
     } else {
         var history2 = getHistory();
         filtered = filter === 'all' ? history2 : history2.filter(function(h) { return h.subject === filter; });
+    }
+
+    // Apply user filter
+    if (userFilter && userFilter !== 'all') {
+        filtered = filtered.filter(function(h) { return h.studentName === userFilter; });
     }
 
     if (filtered.length === 0) {
@@ -316,7 +356,7 @@ async function renderHistory() {
             '<div class="history-stats"><span class="text-success">Benar: ' + record.correct + '</span>' +
             '<span class="text-danger">Salah: ' + record.wrong + '</span>' +
             '<span>Waktu: ' + timeUsed + '</span>' +
-            (record.studentName ? '<span>Nama: ' + record.studentName + '</span>' : '') + '</div>' +
+            (record.studentName ? '<span>👤 ' + record.studentName + '</span>' : '') + '</div>' +
             '<button class="btn btn-sm btn-secondary" onclick="toggleDetails(' + idx + ')">Lihat Detail</button>' +
             '<div class="history-details" id="details-' + idx + '" style="display:none;"></div>';
         container.appendChild(card);
@@ -474,5 +514,79 @@ function showAIStatus(message, type) {
     statusEl.textContent = message;
     if (type === 'success') {
         setTimeout(function() { statusEl.style.display = 'none'; }, 5000);
+    }
+}
+
+// ==================== EXAM SETTINGS ====================
+
+var examSettings = {
+    pai: 20,
+    ppkn: 20,
+    matematika: 20,
+    bahasa_indonesia: 20,
+    bahasa_arab: 20,
+    bahasa_inggris: 20
+};
+
+async function loadExamSettings() {
+    var grid = document.getElementById('settings-grid');
+    grid.innerHTML = '<div class="empty-state">Memuat pengaturan...</div>';
+
+    // Try to load from Firestore
+    if (typeof isFirebaseConfigured === 'function' && isFirebaseConfigured()) {
+        try {
+            var doc = await db.collection('settings').doc('exam').get();
+            if (doc.exists && doc.data().questionsPerExam) {
+                examSettings = doc.data().questionsPerExam;
+            }
+        } catch (e) {
+            console.error('loadExamSettings error:', e);
+        }
+    }
+
+    var subjects = ['pai', 'ppkn', 'matematika', 'bahasa_indonesia', 'bahasa_arab', 'bahasa_inggris'];
+    grid.innerHTML = '';
+
+    subjects.forEach(function(subject) {
+        var count = examSettings[subject] || 20;
+        var row = document.createElement('div');
+        row.className = 'settings-row';
+        row.innerHTML = '<label>' + getSubjectIcon(subject) + ' ' + getSubjectName(subject) + '</label>' +
+            '<input type="number" id="setting-' + subject + '" value="' + count + '" min="5" max="50" step="5">' +
+            '<span class="settings-hint">soal</span>';
+        grid.appendChild(row);
+    });
+}
+
+async function saveExamSettings() {
+    var subjects = ['pai', 'ppkn', 'matematika', 'bahasa_indonesia', 'bahasa_arab', 'bahasa_inggris'];
+    var newSettings = {};
+
+    subjects.forEach(function(subject) {
+        var input = document.getElementById('setting-' + subject);
+        newSettings[subject] = parseInt(input.value) || 20;
+    });
+
+    examSettings = newSettings;
+
+    var statusEl = document.getElementById('settings-status');
+    statusEl.style.display = 'block';
+    statusEl.className = 'ai-status loading';
+    statusEl.textContent = 'Menyimpan pengaturan...';
+
+    try {
+        if (typeof isFirebaseConfigured === 'function' && isFirebaseConfigured()) {
+            await db.collection('settings').doc('exam').set({
+                questionsPerExam: newSettings,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+        localStorage.setItem('examSettings', JSON.stringify(newSettings));
+        statusEl.className = 'ai-status success';
+        statusEl.textContent = 'Pengaturan berhasil disimpan!';
+        setTimeout(function() { statusEl.style.display = 'none'; }, 3000);
+    } catch (e) {
+        statusEl.className = 'ai-status error';
+        statusEl.textContent = 'Gagal menyimpan: ' + e.message;
     }
 }
