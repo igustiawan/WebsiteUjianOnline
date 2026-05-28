@@ -1053,3 +1053,24 @@ header .subtitle {
     .lb-rank { font-size: 1.2em; min-width: 32px; }
     .lb-score { font-size: 1.1em; }
 }
+
+
+
+/* ==================== EXPLANATION BOX ==================== */
+.explanation-box {
+    margin-top: 8px;
+    padding: 10px 14px;
+    background: #fffbeb;
+    border: 2px solid #fde68a;
+    border-radius: 10px;
+    font-size: 0.85em;
+    color: #92400e;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.result-item.correct .explanation-box {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #065f46;
+}

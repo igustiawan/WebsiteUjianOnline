@@ -379,7 +379,7 @@ function finishExam() {
     currentQuestions.forEach(function(question, index) {
         var isCorrect = userAnswers[index] === question.answer;
         if (isCorrect) correct++;
-        details.push({ number: index + 1, question: question.question, userAnswer: userAnswers[index] !== null ? question.options[userAnswers[index]] : 'Tidak dijawab', correctAnswer: question.options[question.answer], isCorrect: isCorrect });
+        details.push({ number: index + 1, question: question.question, userAnswer: userAnswers[index] !== null ? question.options[userAnswers[index]] : 'Tidak dijawab', correctAnswer: question.options[question.answer], isCorrect: isCorrect, explanation: question.explanation || '' });
     });
     var total = currentQuestions.length;
     var score = Math.round((correct / total) * 100);
@@ -420,11 +420,11 @@ function showResult(score, correct, total, details) {
         details.forEach(function(item) {
             var div = document.createElement('div');
             div.className = 'result-item ' + (item.isCorrect ? 'correct' : 'wrong');
-            div.innerHTML = '<span>' + (item.isCorrect ? '✅' : '❌') + '</span><div><strong>Soal ' + item.number + ':</strong> ' + item.question + '<br><small>Jawabanmu: ' + item.userAnswer + '</small><br>' + (!item.isCorrect ? '<small>Jawaban benar: ' + item.correctAnswer + '</small>' : '') + '</div>';
+            var explanationHtml = item.explanation ? '<div class="explanation-box">💡 <strong>Penjelasan:</strong> ' + item.explanation + '</div>' : '';
+            div.innerHTML = '<span>' + (item.isCorrect ? '✅' : '❌') + '</span><div><strong>Soal ' + item.number + ':</strong> ' + item.question + '<br><small>Jawabanmu: ' + item.userAnswer + '</small><br>' + (!item.isCorrect ? '<small>Jawaban benar: ' + item.correctAnswer + '</small><br>' : '') + explanationHtml + '</div>';
             detailsContainer.appendChild(div);
         });
     } else {
-        detailsContainer.style.display = 'none';
         detailsContainer.innerHTML = '<p class="answers-locked">🔒 Kunci jawaban dikunci oleh admin.</p>';
         detailsContainer.style.display = 'block';
     }

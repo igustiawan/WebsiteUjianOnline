@@ -515,7 +515,7 @@ async function generateWithAI() {
 
 function buildPrompt(materi, count) {
     var cpText = materi.capaianPembelajaran ? '\nCAPAIAN PEMBELAJARAN:\n' + materi.capaianPembelajaran + '\n' : '';
-    return 'Buatkan ' + count + ' soal pilihan ganda untuk SAT ' + materi.name + ' ' + materi.kelas + '.\n\nKURIKULUM: Kurikulum Merdeka 2026\nJENJANG: SD/MI Kelas 1 (usia 6-7 tahun)\n' + cpText + '\nMATERI:\n' + materi.materi.map(function(m, i) { return (i + 1) + '. ' + m; }).join('\n') + '\n\nATURAN:\n- 4 pilihan jawaban (A,B,C,D)\n- Soal sederhana untuk anak kelas 1\n- Sebar merata dari semua materi\n- Jawaban benar tersebar merata\n\nFORMAT (JSON VALID):\n[{"question":"...","options":["A","B","C","D"],"answer":0}]\n\nJawab HANYA JSON array.';
+    return 'Buatkan ' + count + ' soal pilihan ganda untuk SAT ' + materi.name + ' ' + materi.kelas + '.\n\nKURIKULUM: Kurikulum Merdeka 2026\nJENJANG: SD/MI Kelas 1 (usia 6-7 tahun)\n' + cpText + '\nMATERI:\n' + materi.materi.map(function(m, i) { return (i + 1) + '. ' + m; }).join('\n') + '\n\nATURAN:\n- 4 pilihan jawaban (A,B,C,D)\n- Soal sederhana untuk anak kelas 1\n- Sebar merata dari semua materi\n- Jawaban benar tersebar merata\n- WAJIB sertakan penjelasan singkat kenapa jawaban tersebut benar\n\nFORMAT (JSON VALID):\n[{"question":"...","options":["A","B","C","D"],"answer":0,"explanation":"Penjelasan singkat kenapa jawaban ini benar"}]\n\nJawab HANYA JSON array.';
 }
 
 function parseAIResponse(content) {
