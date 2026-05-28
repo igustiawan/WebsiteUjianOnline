@@ -9,12 +9,13 @@
 //    - Atau set rules untuk production
 
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyCishYiSD8YZIf_jSmelKA96n8bRcmTnws",
+    authDomain: "ujian-online-anak.firebaseapp.com",
+    projectId: "ujian-online-anak",
+    storageBucket: "ujian-online-anak.firebasestorage.app",
+    messagingSenderId: "935415091174",
+    appId: "1:935415091174:web:937ecdb9109f50df709027",
+    measurementId: "G-TNRV9KPV6E"
 };
 
 // Initialize Firebase
