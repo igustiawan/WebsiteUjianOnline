@@ -1,6 +1,6 @@
 // ==================== ADMIN CONFIG ====================
-const ADMIN_USERNAME = 'admin';
-const ADMIN_PASSWORD = 'admin123';
+// Admin uses Google Sign-In - only these emails have access
+const ADMIN_EMAILS = ['igustiawan@gmail.com']; // Ganti/tambah email admin di sini
 
 let currentEditIndex = null;
 let currentSubjectTab = 'pai';
@@ -8,37 +8,43 @@ let currentSubjectTab = 'pai';
 // ==================== LOGIN ====================
 
 function checkAuth() {
-    const isLoggedIn = sessionStorage.getItem('adminLoggedIn');
-    if (isLoggedIn === 'true') {
-        document.getElementById('login-page').style.display = 'none';
-        document.getElementById('admin-page').style.display = 'block';
-        showPage('dashboard');
-    }
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user && ADMIN_EMAILS.includes(user.email)) {
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('admin-page').style.display = 'block';
+            showPage('dashboard');
+        }
+    });
 }
 
 function handleLogin(e) {
     e.preventDefault();
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    const errorEl = document.getElementById('login-error');
+    var errorEl = document.getElementById('login-error');
+    var provider = new firebase.auth.GoogleAuthProvider();
 
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-        sessionStorage.setItem('adminLoggedIn', 'true');
-        document.getElementById('login-page').style.display = 'none';
-        document.getElementById('admin-page').style.display = 'block';
-        showPage('dashboard');
-    } else {
-        errorEl.textContent = 'Username atau password salah!';
-        errorEl.style.display = 'block';
-    }
+    firebase.auth().signInWithPopup(provider).then(function(result) {
+        if (ADMIN_EMAILS.includes(result.user.email)) {
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('admin-page').style.display = 'block';
+            showPage('dashboard');
+        } else {
+            firebase.auth().signOut();
+            errorEl.textContent = 'Email ini tidak memiliki akses admin!';
+            errorEl.style.display = 'block';
+        }
+    }).catch(function(error) {
+        if (error.code !== 'auth/popup-closed-by-user') {
+            errorEl.textContent = 'Gagal login: ' + error.message;
+            errorEl.style.display = 'block';
+        }
+    });
 }
 
 function handleLogout() {
-    sessionStorage.removeItem('adminLoggedIn');
-    document.getElementById('login-page').style.display = 'block';
-    document.getElementById('admin-page').style.display = 'none';
-    document.getElementById('username').value = '';
-    document.getElementById('password').value = '';
+    firebase.auth().signOut().then(function() {
+        document.getElementById('login-page').style.display = 'block';
+        document.getElementById('admin-page').style.display = 'none';
+    });
 }
 
 // ==================== PAGE NAVIGATION ====================
@@ -63,6 +69,11 @@ function showPage(page) {
 }
 
 // ==================== HELPERS ====================
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
 
 function getHistory() {
     return JSON.parse(localStorage.getItem('examHistory') || '[]');
