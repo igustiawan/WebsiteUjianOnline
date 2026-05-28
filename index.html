@@ -14,32 +14,39 @@
     </div>
 
     <div class="container">
-        <header>
-            <h1>✏️ Ujian Online</h1>
-            <p class="subtitle">SAT TA 2025/2026 — Kelas I (Satu)</p>
-        </header>
-
         <!-- Halaman Input Nama -->
-        <div id="name-page">
-            <div class="welcome-box">
-                <div class="welcome-illustration">🎒📚✨</div>
-                <h2>Halo Nak! 👋</h2>
-                <p>Tulis namamu dulu ya, baru bisa mulai ujian!</p>
+        <div id="name-page" class="name-page-wrapper">
+            <div class="name-hero">
+                <div class="name-characters">
+                    <span class="float-emoji e1">📖</span>
+                    <span class="float-emoji e2">⭐</span>
+                    <span class="float-emoji e3">🎨</span>
+                    <span class="float-emoji e4">🏆</span>
+                    <span class="float-emoji e5">✏️</span>
+                </div>
+                <div class="name-mascot">🧑‍🎓</div>
+                <h1 class="name-title">Ujian Online</h1>
+                <p class="name-subtitle">SAT TA 2025/2026 — Kelas 1</p>
             </div>
-
-            <div class="name-form-box">
+            <div class="name-card">
+                <h2>Siapa namamu? 😊</h2>
+                <p>Tulis nama lengkapmu di bawah ini ya!</p>
                 <form onsubmit="submitName(event)">
-                    <div class="name-input-wrapper">
-                        <label for="student-name">Nama Lengkap:</label>
-                        <input type="text" id="student-name" placeholder="Tulis namamu di sini..." required autocomplete="off">
+                    <div class="name-input-group">
+                        <input type="text" id="student-name" placeholder="Ketik namamu di sini..." required autocomplete="off">
                     </div>
-                    <button type="submit" class="btn btn-primary btn-full">Mulai Ujian! 🚀</button>
+                    <button type="submit" class="btn btn-start">Ayo Mulai! 🚀</button>
                 </form>
             </div>
         </div>
 
         <!-- Halaman Utama (Pilih Mapel) -->
         <div id="home-page" style="display: none;">
+            <header>
+                <h1>✏️ Ujian Online</h1>
+                <p class="subtitle">SAT TA 2025/2026 — Kelas I (Satu)</p>
+            </header>
+
             <div class="welcome-box">
                 <h2>Halo, <span id="display-name"></span>! 🌟</h2>
                 <p>Pilih mata pelajaran di bawah untuk mulai mengerjakan soal ya!</p>
@@ -132,7 +139,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
-
     <script src="js/app.js"></script>
 </body>
 </html>
